@@ -1,0 +1,5 @@
+package com.tiresense.tiresense
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()
