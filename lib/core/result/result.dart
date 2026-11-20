@@ -1,4 +1,4 @@
-import 'package:tiresense/core/failure.dart';
+import 'package:tiresense/core/result/failure.dart';
 
 sealed class Result<T> {
   const Result();
