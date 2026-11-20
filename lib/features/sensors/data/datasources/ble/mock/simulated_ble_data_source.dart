@@ -1,0 +1,74 @@
+import 'dart:async';
+import 'dart:math';
+
+import 'package:tiresense/features/sensors/data/datasources/ble/api/ble_sensor_data_source.dart';
+import 'package:tiresense/features/sensors/domain/models/sensor_frame.dart';
+import 'package:tiresense/features/sensors/domain/models/sensor_reading.dart';
+
+final class SimulatedBleDataSource implements BleSensorDataSource {
+  static const defaultSensorIds = [
+    'SENSOR_001',
+    'SENSOR_002',
+    'SENSOR_003',
+    'SENSOR_004',
+  ];
+
+  static const _missingRate = 0.1;
+  static const _frameDelay = Duration(milliseconds: 40);
+
+  final Random _random = Random();
+  final Map<String, int> _batteryLevel = {};
+  final StreamController<SensorFrame> _controller = StreamController<SensorFrame>.broadcast();
+
+  int _frameCount = 0;
+
+  @override
+  Stream<SensorFrame> frames() => _controller.stream;
+
+  @override
+  Future<void> requestFrame() async {
+    await Future<void>.delayed(_frameDelay);
+    _controller.add(_nextFrame());
+  }
+
+  SensorFrame _nextFrame() {
+    final timestamp = DateTime.now();
+    final readings = <SensorReading>[];
+    for (final id in defaultSensorIds) {
+      // The first frame includes every sensor so the screen starts populated.
+      final missing = _frameCount > 0 && _random.nextDouble() < _missingRate;
+      if (missing) {
+        continue;
+      }
+      readings.add(_reading(id, timestamp));
+    }
+    _frameCount++;
+    return SensorFrame(timestamp: timestamp, readings: readings);
+  }
+
+  SensorReading _reading(String id, DateTime timestamp) {
+    final pressure = 1.8 + (_random.nextInt(121) / 100);
+    final temperature = 15 + (_random.nextInt(451) / 10);
+    final rssi = -100 + _random.nextInt(61);
+    final batteryLevel = _nextBatteryLevel(id);
+   
+    return SensorReading(
+      id: id,
+      pressure: pressure,
+      temperature: temperature,
+      rssi: rssi,
+      batteryLevel: batteryLevel,
+      updatedAt: timestamp,
+    );
+  }
+
+  int _nextBatteryLevel(String id) {
+    final previous = _batteryLevel[id];
+    final level = previous == null
+        ? 70 + _random.nextInt(31)
+        : max(0, previous - _random.nextInt(2));
+        
+    _batteryLevel[id] = level;
+    return level;
+  }
+}
