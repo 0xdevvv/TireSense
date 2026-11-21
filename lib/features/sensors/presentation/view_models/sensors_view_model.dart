@@ -35,20 +35,20 @@ final class SensorsViewModel extends Notifier<SensorsState> {
   void _onFrame(SensorFrame frame) {
     final readings = Map.of(state.readings);
     final serialNumbers = Map.of(state.serialNumbers);
-    
+
     final arrived = <String>{};
     final pendingSerialNumbers = <String>[];
 
     for (final reading in frame.readings) {
       arrived.add(reading.id);
       readings[reading.id] = reading;
-      
+
       if (!serialNumbers.containsKey(reading.id)) {
         serialNumbers[reading.id] = const SerialNumberLoading();
         pendingSerialNumbers.add(reading.id);
       }
     }
-    
+
     final staleSensorIds = readings.keys.toSet().difference(arrived);
 
     state = state.copyWith(
@@ -71,7 +71,7 @@ final class SensorsViewModel extends Notifier<SensorsState> {
     final result = await ref
         .read(getSerialNumberUseCaseProvider)
         .execute(sensorId);
-    
+
     if (ref.mounted) {
       final serialNumber = switch (result) {
         Success(:final value) => SerialNumberReady(value),
