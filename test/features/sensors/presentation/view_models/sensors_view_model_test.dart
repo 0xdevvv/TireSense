@@ -26,11 +26,11 @@ void main() {
     await _flush();
 
     final state = container.read(sensorsViewModelProvider);
-    expect(state.readings['SENSOR_001']?.pressure, 2.2);
-    expect(state.staleSensorIds, isEmpty);
+    expect(state.sensor('SENSOR_001')!.reading.pressure, 2.2);
+    expect(state.sensor('SENSOR_001')!.isStale, isFalse);
     expect(serials.requested, ['SENSOR_001']);
     expect(
-      state.serialNumbers['SENSOR_001'],
+      state.sensor('SENSOR_001')!.serialNumber,
       isA<SerialNumberReady>().having(
         (ready) => ready.serialNumber,
         'serialNumber',
@@ -52,8 +52,31 @@ void main() {
     await _flush();
 
     final state = container.read(sensorsViewModelProvider);
-    expect(state.readings.containsKey('SENSOR_001'), isTrue);
-    expect(state.staleSensorIds, {'SENSOR_001'});
+    expect(state.sensor('SENSOR_001'), isNotNull);
+    expect(state.sensor('SENSOR_001')!.isStale, isTrue);
+  });
+
+  test('the next frame requests a failed serial number again', () async {
+    final sensors = _FakeSensorRepository();
+    final serials = _FakeSerialNumberRepository(ErrorResult(NetworkFailure()));
+    final container = _container(sensors, serials);
+
+    await container.read(sensorsViewModelProvider.notifier).requestFrame();
+    sensors.emit(_frame(['SENSOR_001']));
+    await _flush();
+
+    serials.result = Success('SN-2026-0001');
+    sensors.emit(_frame(['SENSOR_001']));
+    await _flush();
+
+    expect(
+      container
+          .read(sensorsViewModelProvider)
+          .sensor('SENSOR_001')!
+          .serialNumber,
+      isA<SerialNumberReady>(),
+    );
+    expect(serials.requested, ['SENSOR_001', 'SENSOR_001']);
   });
 
   test('a failed serial number can be retried', () async {
@@ -65,7 +88,10 @@ void main() {
     sensors.emit(_frame(['SENSOR_001']));
     await _flush();
     expect(
-      container.read(sensorsViewModelProvider).serialNumbers['SENSOR_001'],
+      container
+          .read(sensorsViewModelProvider)
+          .sensor('SENSOR_001')!
+          .serialNumber,
       isA<SerialNumberFailed>(),
     );
 
@@ -75,8 +101,129 @@ void main() {
         .retrySerialNumber('SENSOR_001');
 
     expect(
-      container.read(sensorsViewModelProvider).serialNumbers['SENSOR_001'],
+      container
+          .read(sensorsViewModelProvider)
+          .sensor('SENSOR_001')!
+          .serialNumber,
       isA<SerialNumberReady>(),
+    );
+  });
+
+  test('sensorProvider reads one sensor', () async {
+    final sensors = _FakeSensorRepository();
+    final container = _container(
+      sensors,
+      _FakeSerialNumberRepository(Success('SN-2026-0001')),
+    );
+
+    await container.read(sensorsViewModelProvider.notifier).requestFrame();
+    sensors.emit(_frame(['SENSOR_001', 'SENSOR_002']));
+    await _flush();
+
+    expect(
+      container.read(sensorProvider('SENSOR_001'))!.reading.pressure,
+      2.2,
+    );
+    expect(container.read(sensorProvider('SENSOR_002')), isNotNull);
+    expect(container.read(sensorProvider('SENSOR_003')), isNull);
+  });
+
+  test('a serial number update notifies only that sensor provider', () async {
+    final sensors = _FakeSensorRepository();
+    final container = _container(
+      sensors,
+      _FakeSerialNumberRepository(Success('SN-2026-0001')),
+    );
+
+    await container.read(sensorsViewModelProvider.notifier).requestFrame();
+    sensors.emit(_frame(['SENSOR_001', 'SENSOR_002']));
+    await _flush();
+
+    final updated = <String>[];
+    container.listen(
+      sensorProvider('SENSOR_001'),
+      (_, _) => updated.add('SENSOR_001'),
+    );
+    container.listen(
+      sensorProvider('SENSOR_002'),
+      (_, _) => updated.add('SENSOR_002'),
+    );
+    var idsChanged = false;
+    container.listen(
+      sensorsViewModelProvider.select((state) => state.sensorIds),
+      (_, _) => idsChanged = true,
+    );
+
+    await container
+        .read(sensorsViewModelProvider.notifier)
+        .retrySerialNumber('SENSOR_001');
+    await _flush();
+
+    expect(updated, ['SENSOR_001']);
+    expect(idsChanged, isFalse);
+    expect(
+      container.read(sensorProvider('SENSOR_001'))!.serialNumber,
+      isA<SerialNumberReady>(),
+    );
+  });
+
+  test('a frame with the same sensors keeps the id list', () async {
+    final sensors = _FakeSensorRepository();
+    final container = _container(
+      sensors,
+      _FakeSerialNumberRepository(Success('SN-2026-0001')),
+    );
+
+    await container.read(sensorsViewModelProvider.notifier).requestFrame();
+    sensors.emit(_frame(['SENSOR_001', 'SENSOR_002']));
+    await _flush();
+    final ids = container.read(sensorsViewModelProvider).sensorIds;
+
+    var idsChanged = false;
+    container.listen(
+      sensorsViewModelProvider.select((state) => state.sensorIds),
+      (_, _) => idsChanged = true,
+    );
+
+    sensors.emit(_frame(['SENSOR_002', 'SENSOR_001']));
+    await _flush();
+
+    expect(idsChanged, isFalse);
+    expect(
+      identical(container.read(sensorsViewModelProvider).sensorIds, ids),
+      isTrue,
+    );
+  });
+
+  test('a new sensor replaces the id list', () async {
+    final sensors = _FakeSensorRepository();
+    final container = _container(
+      sensors,
+      _FakeSerialNumberRepository(Success('SN-2026-0001')),
+    );
+
+    await container.read(sensorsViewModelProvider.notifier).requestFrame();
+    sensors.emit(_frame(['SENSOR_001']));
+    await _flush();
+    final ids = container.read(sensorsViewModelProvider).sensorIds;
+
+    var idsChanged = false;
+    container.listen(
+      sensorsViewModelProvider.select((state) => state.sensorIds),
+      (_, _) => idsChanged = true,
+    );
+
+    sensors.emit(_frame(['SENSOR_001', 'SENSOR_002']));
+    await _flush();
+
+    expect(idsChanged, isTrue);
+    expect(container.read(sensorsViewModelProvider).sensorIds, [
+      'SENSOR_001',
+      'SENSOR_002',
+    ]);
+    expect(
+      identical(container.read(sensorsViewModelProvider).sensorIds, ids),
+      isFalse,
     );
   });
 }

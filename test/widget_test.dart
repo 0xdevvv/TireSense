@@ -1,30 +1,72 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:tiresense/core/result/result.dart';
+import 'package:tiresense/features/sensors/domain/models/sensor_frame.dart';
+import 'package:tiresense/features/sensors/domain/repositories/sensor_repository.dart';
+import 'package:tiresense/features/sensors/domain/repositories/serial_number_repository.dart';
+import 'package:tiresense/features/sensors/domain/usecases/get_serial_number_use_case.dart';
+import 'package:tiresense/features/sensors/domain/usecases/request_sensor_frame_use_case.dart';
+import 'package:tiresense/features/sensors/domain/usecases/watch_sensor_frames_use_case.dart';
+import 'package:tiresense/app/sensors_providers.dart';
 import 'package:tiresense/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('the dashboard shows the title and the simulate button', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(overrides: _overrides(), child: const TireSenseApp()),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('TireSense'), findsOneWidget);
+    final button = tester.getTopLeft(find.text('Simulate Sensor Update'));
+    expect(button.dy, greaterThan(500));
+    expect(find.text('Simulate Sensor Update'), findsOneWidget);
   });
+
+  testWidgets('dark mode follows the platform', (tester) async {
+    tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+    addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+
+    await tester.pumpWidget(
+      ProviderScope(overrides: _overrides(), child: const TireSenseApp()),
+    );
+
+    expect(
+      Theme.of(tester.element(find.byType(Scaffold))).brightness,
+      Brightness.dark,
+    );
+  });
+}
+
+List<Override> _overrides() {
+  final sensors = _SilentSensorRepository();
+  return [
+    watchSensorFramesUseCaseProvider.overrideWithValue(
+      WatchSensorFramesUseCase(sensors),
+    ),
+    requestSensorFrameUseCaseProvider.overrideWithValue(
+      RequestSensorFrameUseCase(sensors),
+    ),
+    getSerialNumberUseCaseProvider.overrideWithValue(
+      GetSerialNumberUseCase(_SilentSerialNumberRepository()),
+    ),
+  ];
+}
+
+final class _SilentSensorRepository implements SensorRepository {
+  @override
+  Stream<SensorFrame> watchFrames() => const Stream.empty();
+
+  @override
+  Future<void> requestFrame() async {}
+}
+
+final class _SilentSerialNumberRepository implements SerialNumberRepository {
+  @override
+  Future<Result<String>> getSerialNumber(String sensorId) async {
+    return Success(sensorId);
+  }
 }
