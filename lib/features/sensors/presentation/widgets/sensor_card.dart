@@ -1,0 +1,236 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tiresense/features/sensors/presentation/sensor_limits.dart';
+import 'package:tiresense/features/sensors/presentation/states/serial_number_state.dart';
+import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
+
+class SensorCard extends ConsumerWidget {
+  static const _cardElevation = 0.0;
+  static const _cardPadding = 16.0;
+  static const _cardRadius = 16.0;
+  static const _batteryIconSize = 18.0;
+  static const _warningIconSize = 24.0;
+
+  final String sensorId;
+
+  const SensorCard({super.key, required this.sensorId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final sensor = ref.watch(sensorProvider(sensorId));
+    
+    if (sensor == null) {
+      return const SizedBox.shrink();
+    }
+
+    final reading = sensor.reading;
+    final serialNumber = sensor.serialNumber;
+    final stale = sensor.isStale;
+
+    final sensorColor = SensorLimits.rssiColor(reading.rssi, theme, stale: stale);
+    final batteryLevel = BatteryLevel.of(reading.batteryLevel);
+    final batteryColor = batteryLevel.color(theme, stale: stale);
+    final pressure = SensorLimits.pressureValue(reading.pressure);
+
+    return Card(
+      elevation: _cardElevation,
+      color: theme.colorScheme.surfaceContainerHigh,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(_cardRadius),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(_cardPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                Text(
+                  reading.id,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const Spacer(),
+                if (stale) ...[const _StaleTag(), const SizedBox(width: 8)],
+                Icon(batteryLevel.icon, size: _batteryIconSize, color: batteryColor),
+                const SizedBox(width: 4),
+                Text(
+                  '${reading.batteryLevel}%',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: batteryColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: pressure,
+                minHeight: 6,
+                color: sensorColor,
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Text('Pressure', style: theme.textTheme.bodyMedium),
+                const Spacer(),
+                Text(
+                  '${reading.pressure.toStringAsFixed(2)} bar',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: sensorColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _Metric(
+                    value: '${reading.temperature.toStringAsFixed(1)} °C',
+                    label: 'Temperature',
+                    color: sensorColor,
+                    alignEnd: false,
+                  ),
+                ),
+                Expanded(
+                  child: _Metric(
+                    value: '${reading.rssi} dBm',
+                    label: 'RSSI',
+                    color: sensorColor,
+                    alignEnd: true,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            _SerialNumberLine(serialNumber: serialNumber, onRetry: () {
+              ref.read(sensorsViewModelProvider.notifier).retrySerialNumber(sensorId);
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Metric extends StatelessWidget {
+  final String value;
+  final String label;
+  final Color color;
+  final bool alignEnd;
+
+  const _Metric({
+    required this.value,
+    required this.label,
+    required this.color,
+    required this.alignEnd,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      children: [
+        Text(
+          value,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: color,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        Text(label, style: theme.textTheme.bodySmall),
+      ],
+    );
+  }
+}
+
+class _StaleTag extends StatelessWidget {
+  static const _borderRadius = 20.0;
+
+  const _StaleTag();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(_borderRadius),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
+      ),
+      child: Text('Stale', style: theme.textTheme.labelSmall),
+    );
+  }
+}
+
+class _SerialNumberLine extends StatelessWidget {
+  static const _spinnerStroke = 2.0;
+
+  final SerialNumberState? serialNumber;
+  final VoidCallback onRetry;
+
+  const _SerialNumberLine({required this.serialNumber, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return switch (serialNumber) {
+      null || SerialNumberLoading() => const Align(
+        alignment: Alignment.centerLeft,
+        child: SizedBox(
+          width: 16,
+          height: 16,
+          child: CircularProgressIndicator(strokeWidth: _spinnerStroke),
+        ),
+      ),
+      SerialNumberReady(:final serialNumber) => Text(
+        serialNumber,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+      SerialNumberFailed(:final failure) => Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            size: SensorCard._warningIconSize,
+            color: theme.colorScheme.error,
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: InkWell(
+              onTap: onRetry,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    failure.message,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.error,
+                    ),
+                  ),
+                  Text(
+                    'Retry',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    };
+  }
+}

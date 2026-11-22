@@ -1,0 +1,93 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
+import 'package:tiresense/features/sensors/presentation/widgets/sensor_card.dart';
+import 'package:tiresense/shared/layout/page_layout.dart';
+import 'package:tiresense/shared/widgets/collapsing_title.dart';
+
+class SensorsPage extends ConsumerStatefulWidget {
+  const SensorsPage({super.key});
+
+  @override
+  ConsumerState<SensorsPage> createState() => _SensorsPageState();
+}
+
+class _SensorsPageState extends ConsumerState<SensorsPage> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(sensorsViewModelProvider.notifier).requestFrame();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sensorIds = ref.watch(sensorsViewModelProvider.select((state) => state.sensorIds));
+    final landscape = MediaQuery.orientationOf(context) == Orientation.landscape;
+
+    return Scaffold(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final inset = PageLayout.horizontalInset(constraints.maxWidth);
+
+          return CustomScrollView(
+            slivers: [
+              const CollapsingTitleBar('TireSense'),
+              if (sensorIds.isEmpty)
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              else
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    inset, PageLayout.listTop,
+                    inset, PageLayout.listBottom,
+                  ),
+                  sliver: SliverList.separated(
+                    itemCount: sensorIds.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: PageLayout.cardGap),
+                    itemBuilder: (context, index) {
+                      return SensorCard(
+                        sensorId: sensorIds[index],
+                      );
+                    },
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+      bottomNavigationBar: SafeArea(
+        left: !landscape,
+        right: !landscape,
+        bottom: !landscape,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            PageLayout.margin,
+            PageLayout.buttonTop,
+            PageLayout.margin,
+            PageLayout.margin,
+          ),
+          child: Align(
+            alignment: Alignment.center,
+            heightFactor: 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: PageLayout.maxWidth),
+              child: FilledButton(
+                onPressed: () {
+                  ref.read(sensorsViewModelProvider.notifier).requestFrame();
+                },
+                child: const Text('Simulate Sensor Update'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

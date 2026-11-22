@@ -1,14 +1,16 @@
 import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiresense/core/result/result.dart';
 import 'package:tiresense/features/sensors/domain/models/sensor_frame.dart';
 import 'package:tiresense/app/sensors_providers.dart';
+import 'package:tiresense/features/sensors/presentation/states/sensor_state.dart';
 import 'package:tiresense/features/sensors/presentation/states/sensors_state.dart';
 import 'package:tiresense/features/sensors/presentation/states/serial_number_state.dart';
 
-final sensorsViewModelProvider =
-    NotifierProvider<SensorsViewModel, SensorsState>(SensorsViewModel.new);
+final sensorsViewModelProvider = NotifierProvider<SensorsViewModel, SensorsState>(SensorsViewModel.new);
+final sensorProvider = Provider.family<SensorState?, String>((ref, sensorId) {
+  return ref.watch(sensorsViewModelProvider.select((state) => state.sensor(sensorId)));
+});
 
 final class SensorsViewModel extends Notifier<SensorsState> {
   @override
@@ -33,32 +35,9 @@ final class SensorsViewModel extends Notifier<SensorsState> {
   }
 
   void _onFrame(SensorFrame frame) {
-    final readings = Map.of(state.readings);
-    final serialNumbers = Map.of(state.serialNumbers);
-
-    final arrived = <String>{};
-    final pendingSerialNumbers = <String>[];
-
-    for (final reading in frame.readings) {
-      arrived.add(reading.id);
-      readings[reading.id] = reading;
-
-      if (!serialNumbers.containsKey(reading.id)) {
-        serialNumbers[reading.id] = const SerialNumberLoading();
-        pendingSerialNumbers.add(reading.id);
-      }
-    }
-
-    final staleSensorIds = readings.keys.toSet().difference(arrived);
-
-    state = state.copyWith(
-      readings: readings,
-      serialNumbers: serialNumbers,
-      staleSensorIds: staleSensorIds,
-      lastUpdated: frame.timestamp,
-    );
-
-    _loadPendingSerialNumbers(pendingSerialNumbers);
+    final update = state.applyFrame(frame);
+    state = update.state;
+    _loadPendingSerialNumbers(update.pendingSerialNumbers);
   }
 
   void _loadPendingSerialNumbers(List<String> sensorIds) {
