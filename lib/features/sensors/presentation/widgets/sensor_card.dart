@@ -10,6 +10,7 @@ class SensorCard extends ConsumerWidget {
   static const _cardRadius = 16.0;
   static const _batteryIconSize = 18.0;
   static const _warningIconSize = 24.0;
+  static const _pressureAnimation = Duration(milliseconds: 400);
 
   final String sensorId;
 
@@ -68,11 +69,18 @@ class SensorCard extends ConsumerWidget {
             const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: pressure,
-                minHeight: 6,
-                color: sensorColor,
-                backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween<double>(end: pressure),
+                duration: _pressureAnimation,
+                curve: Curves.easeInOut,
+                builder: (context, value, _) {
+                  return LinearProgressIndicator(
+                    value: value,
+                    minHeight: 6,
+                    color: sensorColor,
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  );
+                },
               ),
             ),
             const SizedBox(height: 10),
