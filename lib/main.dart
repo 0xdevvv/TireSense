@@ -1,65 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tiresense/features/sensors/presentation/views/sensors_page.dart';
+import 'package:tiresense/shared/theme/app_colors.dart';
 
 void main() {
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(const ProviderScope(child: TireSenseApp()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class TireSenseApp extends StatelessWidget {
+  static final _filledButtonTheme = FilledButtonThemeData(
+    style: FilledButton.styleFrom(
+      minimumSize: const Size.fromHeight(52),
+      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    ),
+  );
+
+  const TireSenseApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: const MyHomePage(title: 'TireSense'),
+      title: 'TireSense',
+      theme: _themeFor(Brightness.light),
+      darkTheme: _themeFor(Brightness.dark),
+      themeMode: ThemeMode.system,
+      debugShowCheckedModeBanner: false,
+      home: const SensorsPage(),
     );
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  ThemeData _themeFor(Brightness brightness) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: AppColors.standard.primary,
+      brightness: brightness,
+    ).copyWith(primary: AppColors.standard.primary);
 
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
+    return ThemeData(
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: colorScheme.surface,
+      filledButtonTheme: _filledButtonTheme,
+      extensions: const [AppColors.standard],
     );
   }
 }
