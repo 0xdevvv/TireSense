@@ -11,11 +11,15 @@ abstract final class SensorLimits {
       return theme.colorScheme.outline;
     }
 
-    if (rssi < weakRssi) {
+    if (isWeakRssi(rssi)) {
       return theme.extension<AppColors>()!.lowRssi;
     }
 
     return theme.colorScheme.primary;
+  }
+
+  static bool isWeakRssi(int rssi) {
+    return rssi < weakRssi;
   }
 
   static double pressureValue(double pressure) {

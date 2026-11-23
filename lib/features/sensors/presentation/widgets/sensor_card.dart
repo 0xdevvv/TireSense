@@ -54,7 +54,8 @@ class SensorCard extends ConsumerWidget {
                   ),
                 ),
                 const Spacer(),
-                if (stale) ...[const _StaleTag(), const SizedBox(width: 8)],
+                if (stale) ...[const _SensorTag(tag: 'Stale'), const SizedBox(width: 8)],
+                if (SensorLimits.isWeakRssi(reading.rssi)) ...[const _SensorTag(tag: 'Weak'), const SizedBox(width: 8)],
                 Icon(batteryLevel.icon, size: _batteryIconSize, color: batteryColor),
                 const SizedBox(width: 4),
                 Text(
@@ -161,10 +162,11 @@ class _Metric extends StatelessWidget {
   }
 }
 
-class _StaleTag extends StatelessWidget {
+class _SensorTag extends StatelessWidget {
   static const _borderRadius = 20.0;
+  final String tag;
 
-  const _StaleTag();
+  const _SensorTag({required this.tag});
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +177,7 @@ class _StaleTag extends StatelessWidget {
         borderRadius: BorderRadius.circular(_borderRadius),
         border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
-      child: Text('Stale', style: theme.textTheme.labelSmall),
+      child: Text(tag, style: theme.textTheme.labelSmall),
     );
   }
 }
