@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiresense/features/settings/domain/models/temperature_unit.dart';
 import 'package:tiresense/features/settings/presentation/view_models/settings_view_model.dart';
+import 'package:tiresense/l10n/app_localizations.dart';
 import 'package:tiresense/shared/layout/page_layout.dart';
 import 'package:tiresense/shared/widgets/collapsing_title.dart';
 
@@ -10,6 +11,7 @@ class SettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsViewModelProvider);
     final viewModel = ref.watch(settingsViewModelProvider.notifier);
 
@@ -20,7 +22,7 @@ class SettingsPage extends ConsumerWidget {
           
           return CustomScrollView(
             slivers: [
-              const CollapsingTitleBar('Settings', implyLeading: true),
+              CollapsingTitleBar(l10n.settings, implyLeading: true),
               SliverPadding(
                 padding: EdgeInsets.fromLTRB(
                   inset, PageLayout.listTop, 
@@ -31,14 +33,14 @@ class SettingsPage extends ConsumerWidget {
                   child: SliverList.list(
                     children: [
                       SwitchListTile(
-                        title: const Text('Continuous sensor stream'),
-                        subtitle: const Text('Keep receiving sensor data in real time'),
+                        title: Text(l10n.continuousSensorStream),
+                        subtitle: Text(l10n.continuousSensorStreamSubtitle),
                         value: settings.continuousStream,
                         onChanged: viewModel.setContinuousStream
                       ),
                       SwitchListTile(
-                        title: const Text('Temperature unit'),
-                        subtitle: const Text('Show temperature in °F'),
+                        title: Text(l10n.temperatureUnit),
+                        subtitle: Text(l10n.temperatureUnitSubtitle),
                         value: settings.unit == TemperatureUnit.fahrenheit,
                         onChanged: (value) {
                           viewModel.setUnit(value ? TemperatureUnit.fahrenheit : TemperatureUnit.celsius);

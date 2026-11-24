@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tiresense/app/sensors_providers.dart';
 import 'package:tiresense/features/sensors/presentation/views/sensors_page.dart';
+import 'package:tiresense/l10n/app_localizations.dart';
 import 'package:tiresense/shared/theme/app_colors.dart';
 
 void main() async {
@@ -30,12 +31,16 @@ class TireSenseApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return MaterialApp(
-      title: 'TireSense',
+      title: l10n.tireSense,
       theme: _themeFor(Brightness.light),
       darkTheme: _themeFor(Brightness.dark),
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       home: const SensorsPage(),
     );
   }

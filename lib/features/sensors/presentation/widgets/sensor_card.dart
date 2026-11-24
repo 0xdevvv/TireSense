@@ -5,6 +5,7 @@ import 'package:tiresense/features/sensors/presentation/states/serial_number_sta
 import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
 import 'package:tiresense/features/settings/presentation/helpers/temperature_unit_text.dart';
 import 'package:tiresense/features/settings/presentation/view_models/settings_view_model.dart';
+import 'package:tiresense/l10n/app_localizations.dart';
 import 'package:tiresense/shared/widgets/custom_widgets.dart';
 
 class SensorCard extends ConsumerWidget {
@@ -21,6 +22,7 @@ class SensorCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final sensor = ref.watch(sensorProvider(sensorId));
     final settings = ref.watch(settingsViewModelProvider);
@@ -58,8 +60,8 @@ class SensorCard extends ConsumerWidget {
                   ),
                 ),
                 const Spacer(),
-                if (stale) ...[const _SensorTag(tag: 'Stale'), const SizedBox(width: 8)],
-                if (SensorLimits.isWeakRssi(reading.rssi)) ...[const _SensorTag(tag: 'Weak'), const SizedBox(width: 8)],
+                if (stale) ...[_SensorTag(tag: l10n.stale), const SizedBox(width: 8)],
+                if (SensorLimits.isWeakRssi(reading.rssi)) ...[_SensorTag(tag: l10n.weak), const SizedBox(width: 8)],
                 Icon(batteryLevel.icon, size: _batteryIconSize, color: batteryColor),
                 const SizedBox(width: 4),
                 Text(
@@ -91,7 +93,7 @@ class SensorCard extends ConsumerWidget {
             const SizedBox(height: 10),
             Row(
               children: [
-                Text('Pressure', style: theme.textTheme.bodyMedium),
+                Text(l10n.pressure, style: theme.textTheme.bodyMedium),
                 const Spacer(),
                 Text(
                   '${reading.pressure.toStringAsFixed(2)} bar',
@@ -108,7 +110,7 @@ class SensorCard extends ConsumerWidget {
                 Expanded(
                   child: _Metric(
                     value: settings.unit.format(reading.temperature),
-                    label: 'Temperature',
+                    label: l10n.temperature,
                     color: sensorColor,
                     alignEnd: false,
                   ),
@@ -116,7 +118,7 @@ class SensorCard extends ConsumerWidget {
                 Expanded(
                   child: _Metric(
                     value: '${reading.rssi} dBm',
-                    label: 'RSSI',
+                    label: l10n.rssi,
                     color: sensorColor,
                     alignEnd: true,
                   ),
@@ -194,6 +196,7 @@ class _SerialNumberLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return switch (serialNumber) {
       null || SerialNumberLoading() => const Align(
@@ -228,7 +231,7 @@ class _SerialNumberLine extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Retry',
+                    l10n.retry,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.primary,
                     ),

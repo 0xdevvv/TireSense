@@ -33,7 +33,7 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
 
     return SensorPageState(
       sensors: const SensorsState(),
-      actionLabel: _actionLabel(isStreaming: false),
+      action: _action(isStreaming: false),
     );
   }
 
@@ -55,7 +55,7 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
 
     state = state.copyWith(
       isStreaming: updatedIsStreaming,
-      actionLabel: _actionLabel(isStreaming: updatedIsStreaming),
+      action: _action(isStreaming: updatedIsStreaming),
     );
   }
 
@@ -86,7 +86,7 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
 
     state = state.copyWith(
       isStreaming: isStreaming,
-      actionLabel: _actionLabel(isStreaming: isStreaming),
+      action: _action(isStreaming: isStreaming),
     );
   }
 
@@ -122,9 +122,9 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
     }
   }
 
-  String _actionLabel({required bool isStreaming}) {
-    if (!_continuousStreamSettings) return 'Simulate Sensor Update';
-    if (isStreaming) return 'Stop Sensor Stream';
-    return 'Start Sensor Stream';
+  SensorButtonAction _action({required bool isStreaming}) {
+    if (!_continuousStreamSettings) return SensorButtonAction.simulate;
+    if (isStreaming) return SensorButtonAction.stop;
+    return SensorButtonAction.start;
   }
 }

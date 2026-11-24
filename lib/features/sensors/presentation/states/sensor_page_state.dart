@@ -1,25 +1,27 @@
 import 'package:tiresense/features/sensors/presentation/states/sensors_state.dart';
 
+enum SensorButtonAction { simulate, start, stop }
+
 class SensorPageState {
   final SensorsState sensors;
   final bool isStreaming;
-  final String actionLabel;
+  final SensorButtonAction action;
 
   const SensorPageState({
     required this.sensors,
     this.isStreaming = false,
-    this.actionLabel = '',
+    this.action = SensorButtonAction.simulate,
   });
 
   SensorPageState copyWith({
     SensorsState? sensors,
     bool? isStreaming,
-    String? actionLabel,
+    SensorButtonAction? action,
   }) {
     return SensorPageState(
       sensors: sensors ?? this.sensors,
       isStreaming: isStreaming ?? this.isStreaming,
-      actionLabel: actionLabel ?? this.actionLabel,
+      action: action ?? this.action,
     );
   }
 }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tiresense/features/sensors/presentation/states/sensor_page_state.dart';
 import 'package:tiresense/features/settings/presentation/views/settings_page.dart';
 import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
 import 'package:tiresense/features/sensors/presentation/views/add_sensor_dialog.dart';
 import 'package:tiresense/features/sensors/presentation/widgets/sensor_card.dart';
+import 'package:tiresense/l10n/app_localizations.dart';
 import 'package:tiresense/shared/layout/page_layout.dart';
 import 'package:tiresense/shared/widgets/collapsing_title.dart';
 
@@ -28,6 +30,8 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     final sensorIds = ref.watch(
       sensorsViewModelProvider.select((state) => state.sensors.sensorIds),
     );
@@ -40,7 +44,7 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
           return CustomScrollView(
             slivers: [
               CollapsingTitleBar(
-                'TireSense',
+                l10n.tireSense,
                 actions: [
                   IconButton(
                     onPressed: () async {
@@ -54,7 +58,7 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                          content: Text(success ? 'Sensor added' : 'Sensor limit reached',
+                          content: Text(success ? l10n.sensorAdded : l10n.sensorLimitReached,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer),
                         )
                       ));
@@ -112,10 +116,11 @@ class _SensorUpdateButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final landscape = MediaQuery.orientationOf(context) == Orientation.landscape;
     
-    final actionLabel = ref.watch(
-      sensorsViewModelProvider.select((state) => state.actionLabel),
+    final action = ref.watch(
+      sensorsViewModelProvider.select((state) => state.action),
     );
 
     return SafeArea(
@@ -138,7 +143,11 @@ class _SensorUpdateButton extends ConsumerWidget {
               onPressed: () {
                 ref.read(sensorsViewModelProvider.notifier).requestData();
               },
-              child: Text(actionLabel),
+              child: Text(switch (action) {
+                SensorButtonAction.simulate => l10n.simulateSensorUpdate,
+                SensorButtonAction.start => l10n.startSensorStream,
+                SensorButtonAction.stop => l10n.stopSensorStream,
+              }),
             ),
           ),
         ),
