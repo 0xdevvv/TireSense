@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tiresense/features/sensors/presentation/models/sensor_limits.dart';
+import 'package:tiresense/features/sensors/presentation/helpers/sensor_limits.dart';
 import 'package:tiresense/features/sensors/presentation/states/serial_number_state.dart';
 import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
-import 'package:tiresense/features/settings/presentation/models/temperature_unit_text.dart';
+import 'package:tiresense/features/settings/presentation/helpers/temperature_unit_text.dart';
 import 'package:tiresense/features/settings/presentation/view_models/settings_view_model.dart';
 
 class SensorCard extends ConsumerWidget {
