@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiresense/features/settings/presentation/views/settings_page.dart';
 import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
+import 'package:tiresense/features/sensors/presentation/views/add_sensor_dialog.dart';
 import 'package:tiresense/features/sensors/presentation/widgets/sensor_card.dart';
 import 'package:tiresense/shared/layout/page_layout.dart';
 import 'package:tiresense/shared/widgets/collapsing_title.dart';
@@ -41,6 +42,25 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
               CollapsingTitleBar(
                 'TireSense',
                 actions: [
+                  IconButton(
+                    onPressed: () async {
+                      final id = await showDialog<String>(
+                        context: context,
+                        builder: (context) => const FindSensorDialog(),
+                      );
+                      if (id == null || id.isEmpty || !context.mounted) return;
+                      final success = ref.read(sensorsViewModelProvider.notifier).addSensor(id);
+                      
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                          content: Text(success ? 'Sensor added' : 'Sensor limit reached',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer),
+                        )
+                      ));
+                    },
+                    icon: const Icon(Icons.add_circle),
+                  ),
                   IconButton(
                     onPressed: () {
                       Navigator.of(context).push(

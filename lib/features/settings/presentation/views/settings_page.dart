@@ -31,10 +31,10 @@ class SettingsPage extends ConsumerWidget {
                   child: SliverList.list(
                     children: [
                       SwitchListTile(
-                        title: const Text('Live sensor stream'),
+                        title: const Text('Continuous sensor stream'),
                         subtitle: const Text('Keep receiving sensor data in real time'),
-                        value: settings.liveStream,
-                        onChanged: viewModel.setLiveStream
+                        value: settings.continuousStream,
+                        onChanged: viewModel.setContinuousStream
                       ),
                       SwitchListTile(
                         title: const Text('Temperature unit'),

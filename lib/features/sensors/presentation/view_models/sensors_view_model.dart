@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiresense/core/result/result.dart';
+import 'package:tiresense/features/sensors/domain/exceptions/sensor_limit_reaached_exception.dart';
 import 'package:tiresense/features/sensors/domain/models/sensor_frame.dart';
 import 'package:tiresense/app/sensors_providers.dart';
 import 'package:tiresense/features/sensors/presentation/states/sensor_page_state.dart';
@@ -15,7 +16,7 @@ final sensorProvider = Provider.family<SensorState?, String>((ref, sensorId) {
 });
 
 final class SensorsViewModel extends Notifier<SensorPageState> {
-  bool get _liveStream => ref.read(loadSettingsUseCaseProvider).execute().liveStream;
+  bool get _continuousStream => ref.read(loadSettingsUseCaseProvider).execute().continuousStream;
 
   @override
   SensorPageState build() {
@@ -28,22 +29,36 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
 
     return SensorPageState(
       sensors: const SensorsState(),
-      actionLabel: _actionLabel(streaming: false),
+      actionLabel: _actionLabel(isStreaming: false),
     );
+  }
+  
+  Future<String> findSensor() async {
+    return await ref.read(findSensorUseCaseProvider).execute();
+  }
+
+  bool addSensor(String sensorId) {
+    try {
+      ref.read(addSensorUseCaseProvider).execute(sensorId);
+      return true;
+    } on SensorLimitReachedException catch (_) {
+      return false;
+    } 
   }
 
   void updateState() {
     state = state.copyWith(
-      actionLabel: _actionLabel(streaming: state.streaming),
+      isStreaming: state.isStreaming,
+      actionLabel: _actionLabel(isStreaming: state.isStreaming),
     );
   }
 
   Future<void> requestData({bool firstFrame = false}) {
-    if (firstFrame || !_liveStream) {
+    if (firstFrame || !_continuousStream) {
       return ref.read(requestSensorFrameUseCaseProvider).execute();
     }
 
-    if (state.streaming) {
+    if (state.isStreaming) {
       _stopStream();
     } else {
       _startStream();
@@ -53,19 +68,19 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
   }
 
   void _startStream() {
-    ref.read(setLiveSensorStreamUseCaseProvider).execute(true);
+    ref.read(setContinuousSensorStreamUseCaseProvider).execute(true);
     _setStreaming(true);
   }
 
   void _stopStream() {
-    ref.read(setLiveSensorStreamUseCaseProvider).execute(false);
+    ref.read(setContinuousSensorStreamUseCaseProvider).execute(false);
     _setStreaming(false);
   }
 
-  void _setStreaming(bool streaming) {
+  void _setStreaming(bool isStreaming) {
     state = state.copyWith(
-      streaming: streaming,
-      actionLabel: _actionLabel(streaming: streaming),
+      isStreaming: isStreaming,
+      actionLabel: _actionLabel(isStreaming: isStreaming),
     );
   }
 
@@ -101,9 +116,9 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
     }
   }
 
-  String _actionLabel({required bool streaming}) {
-    if (!_liveStream) return 'Simulate Sensor Update';
-    if (streaming) return 'Stop Sensor Stream';
+  String _actionLabel({required bool isStreaming}) {
+    if (!_continuousStream) return 'Simulate Sensor Update';
+    if (isStreaming) return 'Stop Sensor Stream';
     return 'Start Sensor Stream';
   }
 }

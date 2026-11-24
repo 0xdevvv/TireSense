@@ -8,6 +8,9 @@ final class SensorRepositoryImpl implements SensorRepository {
   SensorRepositoryImpl(this._dataSource);
 
   @override
+  int get sensorCount => _dataSource.sensorCount;
+
+  @override
   Stream<SensorFrame> watchFrames() => _dataSource.frames();
 
   @override
@@ -18,4 +21,10 @@ final class SensorRepositoryImpl implements SensorRepository {
 
   @override
   void stopStream() => _dataSource.stopStream();
+
+  @override
+  void addSensor(String sensorId) => _dataSource.addSensor(sensorId);
+
+  @override
+  Future<String> findSensor() => _dataSource.findSensor();
 }

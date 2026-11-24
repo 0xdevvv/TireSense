@@ -12,7 +12,7 @@ final class SettingsViewModel extends Notifier<Settings> {
 
     return Settings(
       unit: settings.unit,
-      liveStream: settings.liveStream,
+      continuousStream: settings.continuousStream,
     );
   }
 
@@ -20,9 +20,12 @@ final class SettingsViewModel extends Notifier<Settings> {
      _save(state.copyWith(unit: unit));
   }
 
-  void setLiveStream(bool liveStream) {
-    ref.read(setLiveSensorStreamUseCaseProvider).execute(false);
-    _save(state.copyWith(liveStream: liveStream));
+  void setContinuousStream(bool continuousStream) {
+    if (!continuousStream) {
+      ref.read(setContinuousSensorStreamUseCaseProvider).execute(false);
+    }
+
+    _save(state.copyWith(continuousStream: continuousStream));
   }
 
   void _save(Settings settings) {

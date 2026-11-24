@@ -17,16 +17,33 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
   static const _frameDelay = Duration(milliseconds: 40);
   static const _streamInterval = Duration(seconds: 2);
 
+  final Set<String> _sensorIds = <String>{..._defaultSensorIds};
   final Random _random = Random();
   final Map<String, int> _batteryLevel = {};
-  final StreamController<SensorFrame> _controller =
-      StreamController<SensorFrame>.broadcast();
+  final StreamController<SensorFrame> _controller = StreamController<SensorFrame>.broadcast();
 
   int _frameCount = 0;
   Timer? _stream;
 
   @override
+  int get sensorCount => _sensorIds.length;
+
+  @override
   Stream<SensorFrame> frames() => _controller.stream;
+
+  @override
+  Future<String> findSensor() async {
+    await Future.delayed(const Duration(seconds: 2));
+    final next = _sensorIds.length + 1;
+    return 'SENSOR_${next.toString().padLeft(3, '0')}';
+  }
+
+  @override
+  void addSensor(String sensorId) {
+    if (_sensorIds.contains(sensorId)) return;
+    _sensorIds.add(sensorId);
+    _controller.add(_nextFrame());
+  }
 
   @override
   Future<void> requestFrame() async {
@@ -50,7 +67,7 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
   SensorFrame _nextFrame() {
     final timestamp = DateTime.now();
     final readings = <SensorReading>[];
-    for (final id in _defaultSensorIds) {
+    for (final id in _sensorIds) {
       // The first frame includes every sensor so the screen starts populated.
       final missing = _frameCount > 0 && _random.nextDouble() < _missingRate;
       if (missing) {
@@ -86,5 +103,10 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
 
     _batteryLevel[id] = level;
     return level;
+  }
+
+  void dispose() {
+    _controller.close();
+    stopStream();
   }
 }

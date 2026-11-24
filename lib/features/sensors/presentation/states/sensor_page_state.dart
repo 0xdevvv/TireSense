@@ -2,23 +2,23 @@ import 'package:tiresense/features/sensors/presentation/states/sensors_state.dar
 
 class SensorPageState {
   final SensorsState sensors;
-  final bool streaming;
+  final bool isStreaming;
   final String actionLabel;
 
   const SensorPageState({
     required this.sensors,
-    this.streaming = false,
+    this.isStreaming = false,
     this.actionLabel = '',
   });
 
   SensorPageState copyWith({
     SensorsState? sensors,
-    bool? streaming,
+    bool? isStreaming,
     String? actionLabel,
   }) {
     return SensorPageState(
       sensors: sensors ?? this.sensors,
-      streaming: streaming ?? this.streaming,
+      isStreaming: isStreaming ?? this.isStreaming,
       actionLabel: actionLabel ?? this.actionLabel,
     );
   }

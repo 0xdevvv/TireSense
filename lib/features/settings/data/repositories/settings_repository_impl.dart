@@ -5,7 +5,7 @@ import 'package:tiresense/features/settings/domain/repositories/settings_reposit
 
 final class SettingsRepositoryImpl implements SettingsRepository {
   static const _unitKey = 'settings.temperature_unit';
-  static const _liveStreamKey = 'settings.live_stream';
+  static const _continuousStreamKey = 'settings.continuous_stream';
 
   final SharedPreferences _preferences;
 
@@ -17,13 +17,13 @@ final class SettingsRepositoryImpl implements SettingsRepository {
     
     return Settings(
       unit: TemperatureUnit.fromName(unitName),
-      liveStream: _preferences.getBool(_liveStreamKey) ?? false,
+      continuousStream: _preferences.getBool(_continuousStreamKey) ?? false,
     );
   }
 
   @override
   Future<void> save(Settings settings) async {
     await _preferences.setString(_unitKey, settings.unit.name);
-    await _preferences.setBool(_liveStreamKey, settings.liveStream);
+    await _preferences.setBool(_continuousStreamKey, settings.continuousStream);
   }
 }
