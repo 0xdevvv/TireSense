@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tiresense/core/result/failure.dart';
 import 'package:tiresense/features/sensors/presentation/helpers/sensor_limits.dart';
 import 'package:tiresense/features/sensors/presentation/states/serial_number_state.dart';
 import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
@@ -225,7 +226,11 @@ class _SerialNumberLine extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    failure.message,
+                    switch (failure) {
+                      NetworkFailure() => l10n.networkRequestFailed,
+                      NotFoundFailure() => l10n.resourceNotFound,
+                      UnknownFailure() => l10n.unexpectedError,
+                    },
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.error,
                     ),
