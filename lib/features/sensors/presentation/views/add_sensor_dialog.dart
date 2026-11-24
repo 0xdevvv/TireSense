@@ -10,60 +10,39 @@ class FindSensorDialog extends ConsumerStatefulWidget {
 }
 
 class _FindSensorDialogState extends ConsumerState<FindSensorDialog> {
-  String? _sensorId;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _search());
-  }
-
-  Future<void> _search() async {
-    final id = await ref.read(sensorsViewModelProvider.notifier).findSensor();
-    
-    if (mounted) {
-      setState(() => _sensorId = id); 
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final found = _sensorId != null;
-
-    final cancelButton = Center(child:TextButton(
-      onPressed: () => Navigator.pop(context),
-      child: const Text('Cancel'),
-    ));
+    final discovered = ref.watch(discoveredSensorProvider);
 
     return AlertDialog(
       title: const Text('Add sensor'),
-      content: _content(),
-      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-      actions: [
-        if (found)
-          FilledButton(
-            onPressed: () => Navigator.pop(context, _sensorId),
-            child: const Text('Add'),
-          ),
-        cancelButton
-      ],
-    );
-  }
-
-  Widget _content() {
-    if (_sensorId == null) {
-      return const Row(
+      content: discovered.when(
+        loading: () =>  const Row(
         children: [
           SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 16),
+            Text('Searching for a sensor'),
+          ],
+        ),
+        data: (sensorId) => Text(sensorId),
+        error: (error, stackTrace) => Text('No sensor found'),
+      ),
+      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+      actions: [
+        if (discovered.asData?.value case final sensorId?)
+          FilledButton(
+            onPressed: () => Navigator.pop(context, sensorId),
+            child: const Text('Add'),
           ),
-          SizedBox(width: 16),
-          Text('Searching for a sensor'),
-        ],
-      );
-    }
-    return Text(_sensorId!);
+        Center(child:TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ))
+      ],
+    );
   }
 }

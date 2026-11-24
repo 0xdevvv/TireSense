@@ -4,7 +4,7 @@ import 'package:tiresense/features/sensors/domain/models/sensor_frame.dart';
 import 'package:tiresense/features/sensors/domain/models/sensor_reading.dart';
 
 void main() {
-  const ids = SimulatedBleDataSource.defaultSensorIds;
+  const ids = ['SENSOR_001', 'SENSOR_002', 'SENSOR_003', 'SENSOR_004'];
 
   Future<List<SensorFrame>> takeFrames(int count) async {
     final dataSource = SimulatedBleDataSource();

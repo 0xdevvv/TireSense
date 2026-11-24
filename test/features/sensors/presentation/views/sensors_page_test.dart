@@ -14,6 +14,9 @@ import 'package:tiresense/features/sensors/domain/repositories/serial_number_rep
 import 'package:tiresense/features/sensors/domain/usecases/get_serial_number_use_case.dart';
 import 'package:tiresense/features/sensors/domain/usecases/request_sensor_frame_use_case.dart';
 import 'package:tiresense/features/sensors/domain/usecases/watch_sensor_frames_use_case.dart';
+import 'package:tiresense/features/settings/domain/models/settings.dart';
+import 'package:tiresense/features/settings/domain/repositories/settings_repository.dart';
+import 'package:tiresense/features/settings/domain/usecases/load_settings_use_case.dart';
 import 'package:tiresense/main.dart';
 
 void main() {
@@ -125,6 +128,9 @@ List<Override> _overrides(SensorRepository sensors, Object serials) {
     getSerialNumberUseCaseProvider.overrideWithValue(
       GetSerialNumberUseCase(repository),
     ),
+    loadSettingsUseCaseProvider.overrideWithValue(
+      LoadSettingsUseCase(_FixedSettingsRepository()),
+    ),
   ];
 }
 
@@ -157,6 +163,29 @@ final class _FakeSensorRepository implements SensorRepository {
 
   @override
   Future<void> requestFrame() async {}
+
+  @override
+  int get sensorCount => 0;
+
+  @override
+  Future<String> findSensor() async => 'SENSOR_005';
+
+  @override
+  void addSensor(String sensorId) {}
+
+  @override
+  void startStream() {}
+
+  @override
+  void stopStream() {}
+}
+
+final class _FixedSettingsRepository implements SettingsRepository {
+  @override
+  Settings load() => const Settings();
+
+  @override
+  Future<void> save(Settings settings) async {}
 }
 
 final class _FakeSerialNumberRepository implements SerialNumberRepository {

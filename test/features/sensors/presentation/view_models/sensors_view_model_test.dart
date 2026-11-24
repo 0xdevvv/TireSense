@@ -11,6 +11,9 @@ import 'package:tiresense/features/sensors/domain/repositories/serial_number_rep
 import 'package:tiresense/features/sensors/domain/usecases/get_serial_number_use_case.dart';
 import 'package:tiresense/features/sensors/domain/usecases/request_sensor_frame_use_case.dart';
 import 'package:tiresense/features/sensors/domain/usecases/watch_sensor_frames_use_case.dart';
+import 'package:tiresense/features/settings/domain/models/settings.dart';
+import 'package:tiresense/features/settings/domain/repositories/settings_repository.dart';
+import 'package:tiresense/features/settings/domain/usecases/load_settings_use_case.dart';
 import 'package:tiresense/app/sensors_providers.dart';
 import 'package:tiresense/features/sensors/presentation/states/serial_number_state.dart';
 import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
@@ -21,16 +24,16 @@ void main() {
     final serials = _FakeSerialNumberRepository(Success('SN-2026-0001'));
     final container = _container(sensors, serials);
 
-    await container.read(sensorsViewModelProvider.notifier).requestFrame();
+    await container.read(sensorsViewModelProvider.notifier).requestData();
     sensors.emit(_frame(['SENSOR_001']));
     await _flush();
 
     final state = container.read(sensorsViewModelProvider);
-    expect(state.sensor('SENSOR_001')!.reading.pressure, 2.2);
-    expect(state.sensor('SENSOR_001')!.isStale, isFalse);
+    expect(state.sensors.sensor('SENSOR_001')!.reading.pressure, 2.2);
+    expect(state.sensors.sensor('SENSOR_001')!.isStale, isFalse);
     expect(serials.requested, ['SENSOR_001']);
     expect(
-      state.sensor('SENSOR_001')!.serialNumber,
+      state.sensors.sensor('SENSOR_001')!.serialNumber,
       isA<SerialNumberReady>().having(
         (ready) => ready.serialNumber,
         'serialNumber',
@@ -46,14 +49,14 @@ void main() {
       _FakeSerialNumberRepository(Success('SN-2026-0001')),
     );
 
-    await container.read(sensorsViewModelProvider.notifier).requestFrame();
+    await container.read(sensorsViewModelProvider.notifier).requestData();
     sensors.emit(_frame(['SENSOR_001', 'SENSOR_002']));
     sensors.emit(_frame(['SENSOR_002']));
     await _flush();
 
     final state = container.read(sensorsViewModelProvider);
-    expect(state.sensor('SENSOR_001'), isNotNull);
-    expect(state.sensor('SENSOR_001')!.isStale, isTrue);
+    expect(state.sensors.sensor('SENSOR_001'), isNotNull);
+    expect(state.sensors.sensor('SENSOR_001')!.isStale, isTrue);
   });
 
   test('the next frame requests a failed serial number again', () async {
@@ -61,7 +64,7 @@ void main() {
     final serials = _FakeSerialNumberRepository(ErrorResult(NetworkFailure()));
     final container = _container(sensors, serials);
 
-    await container.read(sensorsViewModelProvider.notifier).requestFrame();
+    await container.read(sensorsViewModelProvider.notifier).requestData();
     sensors.emit(_frame(['SENSOR_001']));
     await _flush();
 
@@ -72,7 +75,7 @@ void main() {
     expect(
       container
           .read(sensorsViewModelProvider)
-          .sensor('SENSOR_001')!
+          .sensors.sensor('SENSOR_001')!
           .serialNumber,
       isA<SerialNumberReady>(),
     );
@@ -84,13 +87,13 @@ void main() {
     final serials = _FakeSerialNumberRepository(ErrorResult(NetworkFailure()));
     final container = _container(sensors, serials);
 
-    await container.read(sensorsViewModelProvider.notifier).requestFrame();
+    await container.read(sensorsViewModelProvider.notifier).requestData();
     sensors.emit(_frame(['SENSOR_001']));
     await _flush();
     expect(
       container
           .read(sensorsViewModelProvider)
-          .sensor('SENSOR_001')!
+          .sensors.sensor('SENSOR_001')!
           .serialNumber,
       isA<SerialNumberFailed>(),
     );
@@ -103,7 +106,7 @@ void main() {
     expect(
       container
           .read(sensorsViewModelProvider)
-          .sensor('SENSOR_001')!
+          .sensors.sensor('SENSOR_001')!
           .serialNumber,
       isA<SerialNumberReady>(),
     );
@@ -116,7 +119,7 @@ void main() {
       _FakeSerialNumberRepository(Success('SN-2026-0001')),
     );
 
-    await container.read(sensorsViewModelProvider.notifier).requestFrame();
+    await container.read(sensorsViewModelProvider.notifier).requestData();
     sensors.emit(_frame(['SENSOR_001', 'SENSOR_002']));
     await _flush();
 
@@ -135,7 +138,7 @@ void main() {
       _FakeSerialNumberRepository(Success('SN-2026-0001')),
     );
 
-    await container.read(sensorsViewModelProvider.notifier).requestFrame();
+    await container.read(sensorsViewModelProvider.notifier).requestData();
     sensors.emit(_frame(['SENSOR_001', 'SENSOR_002']));
     await _flush();
 
@@ -150,7 +153,7 @@ void main() {
     );
     var idsChanged = false;
     container.listen(
-      sensorsViewModelProvider.select((state) => state.sensorIds),
+      sensorsViewModelProvider.select((state) => state.sensors.sensorIds),
       (_, _) => idsChanged = true,
     );
 
@@ -174,14 +177,14 @@ void main() {
       _FakeSerialNumberRepository(Success('SN-2026-0001')),
     );
 
-    await container.read(sensorsViewModelProvider.notifier).requestFrame();
+    await container.read(sensorsViewModelProvider.notifier).requestData();
     sensors.emit(_frame(['SENSOR_001', 'SENSOR_002']));
     await _flush();
-    final ids = container.read(sensorsViewModelProvider).sensorIds;
+    final ids = container.read(sensorsViewModelProvider).sensors.sensorIds;
 
     var idsChanged = false;
     container.listen(
-      sensorsViewModelProvider.select((state) => state.sensorIds),
+      sensorsViewModelProvider.select((state) => state.sensors.sensorIds),
       (_, _) => idsChanged = true,
     );
 
@@ -190,7 +193,7 @@ void main() {
 
     expect(idsChanged, isFalse);
     expect(
-      identical(container.read(sensorsViewModelProvider).sensorIds, ids),
+      identical(container.read(sensorsViewModelProvider).sensors.sensorIds, ids),
       isTrue,
     );
   });
@@ -202,14 +205,14 @@ void main() {
       _FakeSerialNumberRepository(Success('SN-2026-0001')),
     );
 
-    await container.read(sensorsViewModelProvider.notifier).requestFrame();
+    await container.read(sensorsViewModelProvider.notifier).requestData();
     sensors.emit(_frame(['SENSOR_001']));
     await _flush();
-    final ids = container.read(sensorsViewModelProvider).sensorIds;
+    final ids = container.read(sensorsViewModelProvider).sensors.sensorIds;
 
     var idsChanged = false;
     container.listen(
-      sensorsViewModelProvider.select((state) => state.sensorIds),
+      sensorsViewModelProvider.select((state) => state.sensors.sensorIds),
       (_, _) => idsChanged = true,
     );
 
@@ -217,12 +220,12 @@ void main() {
     await _flush();
 
     expect(idsChanged, isTrue);
-    expect(container.read(sensorsViewModelProvider).sensorIds, [
+    expect(container.read(sensorsViewModelProvider).sensors.sensorIds, [
       'SENSOR_001',
       'SENSOR_002',
     ]);
     expect(
-      identical(container.read(sensorsViewModelProvider).sensorIds, ids),
+      identical(container.read(sensorsViewModelProvider).sensors.sensorIds, ids),
       isFalse,
     );
   });
@@ -242,6 +245,9 @@ ProviderContainer _container(
       ),
       getSerialNumberUseCaseProvider.overrideWithValue(
         GetSerialNumberUseCase(serials),
+      ),
+      loadSettingsUseCaseProvider.overrideWithValue(
+        LoadSettingsUseCase(_FixedSettingsRepository()),
       ),
     ],
   );
@@ -284,6 +290,29 @@ final class _FakeSensorRepository implements SensorRepository {
 
   @override
   Future<void> requestFrame() async {}
+
+  @override
+  int get sensorCount => 0;
+
+  @override
+  Future<String> findSensor() async => 'SENSOR_005';
+
+  @override
+  void addSensor(String sensorId) {}
+
+  @override
+  void startStream() {}
+
+  @override
+  void stopStream() {}
+}
+
+final class _FixedSettingsRepository implements SettingsRepository {
+  @override
+  Settings load() => const Settings();
+
+  @override
+  Future<void> save(Settings settings) async {}
 }
 
 final class _FakeSerialNumberRepository implements SerialNumberRepository {

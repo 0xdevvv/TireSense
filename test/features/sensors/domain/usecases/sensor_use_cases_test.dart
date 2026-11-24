@@ -77,4 +77,19 @@ final class _FakeSensorRepository implements SensorRepository {
   Future<void> requestFrame() async {
     requests++;
   }
+
+  @override
+  int get sensorCount => 0;
+
+  @override
+  Future<String> findSensor() async => 'SENSOR_005';
+
+  @override
+  void addSensor(String sensorId) {}
+
+  @override
+  void startStream() {}
+
+  @override
+  void stopStream() {}
 }

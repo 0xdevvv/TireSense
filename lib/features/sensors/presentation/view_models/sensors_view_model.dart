@@ -15,6 +15,10 @@ final sensorProvider = Provider.family<SensorState?, String>((ref, sensorId) {
   return ref.watch(sensorsViewModelProvider.select((state) => state.sensors.sensor(sensorId)));
 });
 
+final discoveredSensorProvider = FutureProvider.autoDispose<String>((ref) {
+  return ref.watch(findSensorUseCaseProvider).execute();
+});
+
 final class SensorsViewModel extends Notifier<SensorPageState> {
   bool get _continuousStreamSettings => ref.read(loadSettingsUseCaseProvider).execute().continuousStream;
 
@@ -31,10 +35,6 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
       sensors: const SensorsState(),
       actionLabel: _actionLabel(isStreaming: false),
     );
-  }
-  
-  Future<String> findSensor() async {
-    return await ref.read(findSensorUseCaseProvider).execute();
   }
 
   bool addSensor(String sensorId) {
