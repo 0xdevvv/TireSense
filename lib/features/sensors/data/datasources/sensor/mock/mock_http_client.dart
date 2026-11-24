@@ -10,6 +10,12 @@ final class MockHttpClient implements HttpClient {
     'SENSOR_002',
     'SENSOR_003',
     'SENSOR_004',
+    'SENSOR_005',
+    'SENSOR_006',
+    'SENSOR_007',
+    'SENSOR_008',
+    'SENSOR_009',
+    'SENSOR_010'
   ];
 
   final Map<String, Map<String, dynamic>> _routes = _buildRoutes();
@@ -17,9 +23,7 @@ final class MockHttpClient implements HttpClient {
   final double _failureRate;
   final Duration? _latency;
 
-  MockHttpClient()
-    : _failureRate = 0.2,
-      _latency = null;
+  MockHttpClient() : _failureRate = 0.2, _latency = null;
 
   MockHttpClient.test({this._failureRate = 0, this._latency = Duration.zero});
 
@@ -27,14 +31,19 @@ final class MockHttpClient implements HttpClient {
   Future<Map<String, dynamic>> get(String path) async {
     final milliseconds = 300 + _random.nextInt(901);
     final latency = _latency ?? Duration(milliseconds: milliseconds);
+    
     await Future<void>.delayed(latency);
+    
     if (_failureRate > 0 && _random.nextDouble() < _failureRate) {
       throw HttpStatusException(503, path);
     }
+    
     final body = _routes[path];
+    
     if (body == null) {
       throw HttpStatusException(404, path);
     }
+
     return body;
   }
 

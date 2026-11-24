@@ -16,7 +16,7 @@ final sensorProvider = Provider.family<SensorState?, String>((ref, sensorId) {
 });
 
 final class SensorsViewModel extends Notifier<SensorPageState> {
-  bool get _continuousStream => ref.read(loadSettingsUseCaseProvider).execute().continuousStream;
+  bool get _continuousStreamSettings => ref.read(loadSettingsUseCaseProvider).execute().continuousStream;
 
   @override
   SensorPageState build() {
@@ -47,14 +47,20 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
   }
 
   void updateState() {
+    final updatedIsStreaming = _continuousStreamSettings && state.isStreaming;
+    
+    if (state.isStreaming && !updatedIsStreaming) {
+      ref.read(setContinuousSensorStreamUseCaseProvider).execute(false);
+    }
+
     state = state.copyWith(
-      isStreaming: state.isStreaming,
-      actionLabel: _actionLabel(isStreaming: state.isStreaming),
+      isStreaming: updatedIsStreaming,
+      actionLabel: _actionLabel(isStreaming: updatedIsStreaming),
     );
   }
 
   Future<void> requestData({bool firstFrame = false}) {
-    if (firstFrame || !_continuousStream) {
+    if (firstFrame || !_continuousStreamSettings) {
       return ref.read(requestSensorFrameUseCaseProvider).execute();
     }
 
@@ -68,16 +74,16 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
   }
 
   void _startStream() {
-    ref.read(setContinuousSensorStreamUseCaseProvider).execute(true);
     _setStreaming(true);
   }
 
   void _stopStream() {
-    ref.read(setContinuousSensorStreamUseCaseProvider).execute(false);
     _setStreaming(false);
   }
 
   void _setStreaming(bool isStreaming) {
+    ref.read(setContinuousSensorStreamUseCaseProvider).execute(isStreaming);
+
     state = state.copyWith(
       isStreaming: isStreaming,
       actionLabel: _actionLabel(isStreaming: isStreaming),
@@ -117,7 +123,7 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
   }
 
   String _actionLabel({required bool isStreaming}) {
-    if (!_continuousStream) return 'Simulate Sensor Update';
+    if (!_continuousStreamSettings) return 'Simulate Sensor Update';
     if (isStreaming) return 'Stop Sensor Stream';
     return 'Start Sensor Stream';
   }

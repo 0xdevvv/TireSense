@@ -21,10 +21,6 @@ final class SettingsViewModel extends Notifier<Settings> {
   }
 
   void setContinuousStream(bool continuousStream) {
-    if (!continuousStream) {
-      ref.read(setContinuousSensorStreamUseCaseProvider).execute(false);
-    }
-
     _save(state.copyWith(continuousStream: continuousStream));
   }
 
