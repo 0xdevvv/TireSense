@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiresense/features/sensors/presentation/sensor_limits.dart';
 import 'package:tiresense/features/sensors/presentation/states/serial_number_state.dart';
 import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
+import 'package:tiresense/features/settings/presentation/models/temperature_unit_text.dart';
+import 'package:tiresense/features/settings/presentation/view_models/settings_view_model.dart';
 
 class SensorCard extends ConsumerWidget {
   static const _cardElevation = 0.0;
@@ -20,6 +22,7 @@ class SensorCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final sensor = ref.watch(sensorProvider(sensorId));
+    final settings = ref.watch(settingsViewModelProvider);
     
     if (sensor == null) {
       return const SizedBox.shrink();
@@ -103,7 +106,7 @@ class SensorCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: _Metric(
-                    value: '${reading.temperature.toStringAsFixed(1)} °C',
+                    value: settings.unit.format(reading.temperature),
                     label: 'Temperature',
                     color: sensorColor,
                     alignEnd: false,

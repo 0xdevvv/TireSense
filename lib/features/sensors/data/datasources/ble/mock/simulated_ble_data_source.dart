@@ -6,7 +6,7 @@ import 'package:tiresense/features/sensors/domain/models/sensor_frame.dart';
 import 'package:tiresense/features/sensors/domain/models/sensor_reading.dart';
 
 final class SimulatedBleDataSource implements BleSensorDataSource {
-  static const defaultSensorIds = [
+  static const _defaultSensorIds = [
     'SENSOR_001',
     'SENSOR_002',
     'SENSOR_003',
@@ -15,12 +15,15 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
 
   static const _missingRate = 0.1;
   static const _frameDelay = Duration(milliseconds: 40);
+  static const _streamInterval = Duration(seconds: 2);
 
   final Random _random = Random();
   final Map<String, int> _batteryLevel = {};
-  final StreamController<SensorFrame> _controller = StreamController<SensorFrame>.broadcast();
+  final StreamController<SensorFrame> _controller =
+      StreamController<SensorFrame>.broadcast();
 
   int _frameCount = 0;
+  Timer? _stream;
 
   @override
   Stream<SensorFrame> frames() => _controller.stream;
@@ -31,10 +34,23 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
     _controller.add(_nextFrame());
   }
 
+  @override
+  void startStream() {
+    _stream ??= Timer.periodic(_streamInterval, (_) {
+      _controller.add(_nextFrame());
+    });
+  }
+
+  @override
+  void stopStream() {
+    _stream?.cancel();
+    _stream = null;
+  }
+
   SensorFrame _nextFrame() {
     final timestamp = DateTime.now();
     final readings = <SensorReading>[];
-    for (final id in defaultSensorIds) {
+    for (final id in _defaultSensorIds) {
       // The first frame includes every sensor so the screen starts populated.
       final missing = _frameCount > 0 && _random.nextDouble() < _missingRate;
       if (missing) {
@@ -51,7 +67,7 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
     final temperature = 15 + (_random.nextInt(451) / 10);
     final rssi = -100 + _random.nextInt(61);
     final batteryLevel = _nextBatteryLevel(id);
-   
+
     return SensorReading(
       id: id,
       pressure: pressure,
@@ -67,7 +83,7 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
     final level = previous == null
         ? 70 + _random.nextInt(31)
         : max(0, previous - _random.nextInt(2));
-        
+
     _batteryLevel[id] = level;
     return level;
   }

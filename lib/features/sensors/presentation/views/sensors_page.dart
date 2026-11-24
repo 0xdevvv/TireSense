@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tiresense/features/settings/presentation/views/settings_page.dart';
 import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
 import 'package:tiresense/features/sensors/presentation/widgets/sensor_card.dart';
 import 'package:tiresense/shared/layout/page_layout.dart';
@@ -19,15 +20,16 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        ref.read(sensorsViewModelProvider.notifier).requestFrame();
+        ref.read(sensorsViewModelProvider.notifier).requestData(firstFrame: true);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final sensorIds = ref.watch(sensorsViewModelProvider.select((state) => state.sensorIds));
-    final landscape = MediaQuery.orientationOf(context) == Orientation.landscape;
+    final sensorIds = ref.watch(
+      sensorsViewModelProvider.select((state) => state.sensors.sensorIds),
+    );
 
     return Scaffold(
       body: LayoutBuilder(
@@ -36,7 +38,25 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
 
           return CustomScrollView(
             slivers: [
-              const CollapsingTitleBar('TireSense'),
+              CollapsingTitleBar(
+                'TireSense',
+                actions: [
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => const SettingsPage(),
+                        ),
+                      ).then((_) {
+                        if (mounted) {
+                          ref.read(sensorsViewModelProvider.notifier).updateState();
+                        }
+                      });
+                    },
+                    icon: const Icon(Icons.settings),
+                  ),
+                ],
+              ),
               if (sensorIds.isEmpty)
                 const SliverFillRemaining(
                   hasScrollBody: false,
@@ -62,28 +82,43 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
           );
         },
       ),
-      bottomNavigationBar: SafeArea(
-        left: !landscape,
-        right: !landscape,
-        bottom: !landscape,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            PageLayout.margin,
-            PageLayout.buttonTop,
-            PageLayout.margin,
-            PageLayout.margin,
-          ),
-          child: Align(
-            alignment: Alignment.center,
-            heightFactor: 1,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: PageLayout.maxWidth),
-              child: FilledButton(
-                onPressed: () {
-                  ref.read(sensorsViewModelProvider.notifier).requestFrame();
-                },
-                child: const Text('Simulate Sensor Update'),
-              ),
+      bottomNavigationBar: const _SensorUpdateButton(),
+    );
+  }
+}
+
+class _SensorUpdateButton extends ConsumerWidget {
+  const _SensorUpdateButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final landscape = MediaQuery.orientationOf(context) == Orientation.landscape;
+    
+    final actionLabel = ref.watch(
+      sensorsViewModelProvider.select((state) => state.actionLabel),
+    );
+
+    return SafeArea(
+      left: !landscape,
+      right: !landscape,
+      bottom: !landscape,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          PageLayout.margin,
+          PageLayout.buttonTop,
+          PageLayout.margin,
+          PageLayout.margin,
+        ),
+        child: Align(
+          alignment: Alignment.center,
+          heightFactor: 1,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: PageLayout.maxWidth),
+            child: FilledButton(
+              onPressed: () {
+                ref.read(sensorsViewModelProvider.notifier).requestData();
+              },
+              child: Text(actionLabel),
             ),
           ),
         ),

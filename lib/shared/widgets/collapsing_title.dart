@@ -9,14 +9,21 @@ class CollapsingTitleBar extends StatelessWidget {
   static const _scrolledUnderElevation = 0.5;
 
   final String title;
+  final bool implyLeading;
+  final List<Widget> actions;
 
-  const CollapsingTitleBar(this.title, {super.key});
+  const CollapsingTitleBar(
+    this.title, {
+    this.implyLeading = false,
+    this.actions = const [],
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final landscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
+    final landscape = MediaQuery.orientationOf(context) == Orientation.landscape;
     final surface = Theme.of(context).colorScheme.surface;
+    
     return SliverAppBar(
       pinned: true,
       primary: !landscape,
@@ -24,7 +31,8 @@ class CollapsingTitleBar extends StatelessWidget {
       backgroundColor: surface,
       surfaceTintColor: surface,
       scrolledUnderElevation: _scrolledUnderElevation,
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: implyLeading,
+      actions: actions,
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: false,
         expandedTitleScale: _expandedScale,

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tiresense/app/network_providers.dart';
 import 'package:tiresense/features/sensors/data/datasources/ble/api/ble_sensor_data_source.dart';
 import 'package:tiresense/features/sensors/data/datasources/ble/mock/simulated_ble_data_source.dart';
@@ -10,32 +11,68 @@ import 'package:tiresense/features/sensors/domain/repositories/sensor_repository
 import 'package:tiresense/features/sensors/domain/repositories/serial_number_repository.dart';
 import 'package:tiresense/features/sensors/domain/usecases/get_serial_number_use_case.dart';
 import 'package:tiresense/features/sensors/domain/usecases/request_sensor_frame_use_case.dart';
+import 'package:tiresense/features/sensors/domain/usecases/set_live_sensor_stream_use_case.dart';
 import 'package:tiresense/features/sensors/domain/usecases/watch_sensor_frames_use_case.dart';
+import 'package:tiresense/features/settings/data/repositories/settings_repository_impl.dart';
+import 'package:tiresense/features/settings/domain/repositories/settings_repository.dart';
+import 'package:tiresense/features/settings/domain/usecases/load_settings_use_case.dart';
+import 'package:tiresense/features/settings/domain/usecases/save_settings_use_case.dart';
+
+
+// Datasources
+
+final sharedPreferencesProvider = Provider<SharedPreferences>(
+  (ref) => throw UnimplementedError('SharedPreferences is created in main')
+);
 
 final sensorApiProvider = Provider<SensorApi>(
-  (ref) => SensorApiImpl(ref.watch(httpClientProvider)),
-);
-
-final serialNumberRepositoryProvider = Provider<SerialNumberRepository>(
-  (ref) => SerialNumberRepositoryImpl(ref.watch(sensorApiProvider)),
-);
-
-final getSerialNumberUseCaseProvider = Provider(
-  (ref) => GetSerialNumberUseCase(ref.watch(serialNumberRepositoryProvider)),
+  (ref) => SensorApiImpl(ref.watch(httpClientProvider))
 );
 
 final bleSensorDataSourceProvider = Provider<BleSensorDataSource>(
-  (ref) => SimulatedBleDataSource(),
+  (ref) {
+    final source = SimulatedBleDataSource();
+    ref.onDispose(source.stopStream);
+    return source;
+  },
+);
+
+// Repositories
+
+final serialNumberRepositoryProvider = Provider<SerialNumberRepository>(
+  (ref) => SerialNumberRepositoryImpl(ref.watch(sensorApiProvider))
+);
+
+final settingsRepositoryProvider = Provider<SettingsRepository>(
+  (ref) => SettingsRepositoryImpl(ref.watch(sharedPreferencesProvider))
 );
 
 final sensorRepositoryProvider = Provider<SensorRepository>(
-  (ref) => SensorRepositoryImpl(ref.watch(bleSensorDataSourceProvider)),
+  (ref) => SensorRepositoryImpl(ref.watch(bleSensorDataSourceProvider))
+);
+
+// Use Cases
+
+final getSerialNumberUseCaseProvider = Provider(
+  (ref) => GetSerialNumberUseCase(ref.watch(serialNumberRepositoryProvider))
 );
 
 final watchSensorFramesUseCaseProvider = Provider(
-  (ref) => WatchSensorFramesUseCase(ref.watch(sensorRepositoryProvider)),
+  (ref) => WatchSensorFramesUseCase(ref.watch(sensorRepositoryProvider))
 );
 
 final requestSensorFrameUseCaseProvider = Provider(
-  (ref) => RequestSensorFrameUseCase(ref.watch(sensorRepositoryProvider)),
+  (ref) => RequestSensorFrameUseCase(ref.watch(sensorRepositoryProvider))
+);
+
+final setLiveSensorStreamUseCaseProvider = Provider(
+  (ref) => SetLiveSensorStreamUseCase(ref.watch(sensorRepositoryProvider))
+);
+
+final saveSettingsUseCaseProvider = Provider(
+  (ref) => SaveSettingsUseCase(ref.watch(settingsRepositoryProvider))
+);
+
+final loadSettingsUseCaseProvider = Provider(
+  (ref) => LoadSettingsUseCase(ref.watch(settingsRepositoryProvider))
 );

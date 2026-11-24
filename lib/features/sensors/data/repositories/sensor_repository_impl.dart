@@ -12,4 +12,10 @@ final class SensorRepositoryImpl implements SensorRepository {
 
   @override
   Future<void> requestFrame() => _dataSource.requestFrame();
+
+  @override
+  void startStream() => _dataSource.startStream();
+
+  @override
+  void stopStream() => _dataSource.stopStream();
 }

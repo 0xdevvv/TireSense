@@ -9,3 +9,11 @@ abstract interface class AsyncUseCaseWithParam<Param, Output> {
 abstract interface class StreamUseCase<Output> {
   Stream<Output> execute();
 }
+
+abstract interface class UseCase<Output> {
+  Output execute();
+}
+
+abstract interface class UseCaseWithParam<Param, Output> {
+  Output execute(Param param);
+}

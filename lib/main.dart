@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tiresense/app/sensors_providers.dart';
 import 'package:tiresense/features/sensors/presentation/views/sensors_page.dart';
 import 'package:tiresense/shared/theme/app_colors.dart';
 
-void main() {
-  runApp(const ProviderScope(child: TireSenseApp()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final preferences = await SharedPreferences.getInstance();
+  
+  runApp(ProviderScope(
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(preferences),
+    ],
+    child: const TireSenseApp()
+  ));
 }
 
 class TireSenseApp extends StatelessWidget {
@@ -40,7 +50,7 @@ class TireSenseApp extends StatelessWidget {
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colorScheme.surface,
       filledButtonTheme: _filledButtonTheme,
-      extensions: const [AppColors.standard],
+      extensions: const [AppColors.standard]
     );
   }
 }
