@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tiresense/features/sensors/presentation/sensor_limits.dart';
+import 'package:tiresense/features/sensors/presentation/models/sensor_limits.dart';
 import 'package:tiresense/features/sensors/presentation/states/serial_number_state.dart';
 import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
 import 'package:tiresense/features/settings/presentation/models/temperature_unit_text.dart';
