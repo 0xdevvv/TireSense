@@ -5,6 +5,7 @@ import 'package:tiresense/features/sensors/presentation/states/serial_number_sta
 import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
 import 'package:tiresense/features/settings/presentation/helpers/temperature_unit_text.dart';
 import 'package:tiresense/features/settings/presentation/view_models/settings_view_model.dart';
+import 'package:tiresense/shared/widgets/custom_widgets.dart';
 
 class SensorCard extends ConsumerWidget {
   static const _cardElevation = 0.0;
@@ -186,8 +187,6 @@ class _SensorTag extends StatelessWidget {
 }
 
 class _SerialNumberLine extends StatelessWidget {
-  static const _spinnerStroke = 2.0;
-
   final SerialNumberState? serialNumber;
   final VoidCallback onRetry;
 
@@ -199,11 +198,7 @@ class _SerialNumberLine extends StatelessWidget {
     return switch (serialNumber) {
       null || SerialNumberLoading() => const Align(
         alignment: Alignment.centerLeft,
-        child: SizedBox(
-          width: 16,
-          height: 16,
-          child: CircularProgressIndicator(strokeWidth: _spinnerStroke),
-        ),
+        child: CustomWidgets.circularLoading,
       ),
       SerialNumberReady(:final serialNumber) => Text(
         serialNumber,

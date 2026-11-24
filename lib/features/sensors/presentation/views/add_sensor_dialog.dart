@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
+import 'package:tiresense/shared/widgets/custom_widgets.dart';
 
 class FindSensorDialog extends ConsumerStatefulWidget {
   const FindSensorDialog({super.key});
@@ -17,17 +18,12 @@ class _FindSensorDialogState extends ConsumerState<FindSensorDialog> {
     return AlertDialog(
       title: const Text('Add sensor'),
       content: discovered.when(
-        loading: () =>  const Row(
+        loading: () => const Row(
         children: [
-          SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            SizedBox(width: 16),
-            Text('Searching for a sensor'),
-          ],
-        ),
+          CustomWidgets.circularLoading,
+          SizedBox(width: 16),
+          Text('Searching for a sensor'),
+        ]),
         data: (sensorId) => Text(sensorId),
         error: (error, stackTrace) => Text('No sensor found'),
       ),
