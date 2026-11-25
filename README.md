@@ -110,10 +110,10 @@ features
 │   │   │   ├── ble
 │   │   │   └── sensor
 │   │   ├── dto
-│   │   └── repositories
+│   │   └── repositories (implementation)
 │   ├── domain
 │   │   ├── models
-│   │   ├── repositories
+│   │   ├── repositories (interface)
 │   │   ├── usecases
 │   │   └── exceptions
 │   └── presentation
@@ -124,10 +124,10 @@ features
 │       └── helpers
 └── settings
     ├── data
-    │   └── repositories
+    │   └── repositories (implementation)
     ├── domain
     │   ├── models
-    │   ├── repositories
+    │   ├── repositories (interface)
     │   └── usecases
     └── presentation
         ├── views
