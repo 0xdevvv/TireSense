@@ -31,10 +31,8 @@ class TireSenseApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return MaterialApp(
-      title: l10n.tireSense,
+      title: 'TireSense',
       theme: _themeFor(Brightness.light),
       darkTheme: _themeFor(Brightness.dark),
       themeMode: ThemeMode.system,
