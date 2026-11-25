@@ -103,7 +103,6 @@ State is held in Riverpod. `sensorsViewModelProvider` owns the page: the sensor 
 ## Limitations
 
 - There is no physical BLE device and no real server. Both boundaries are mocks behind the repository interfaces.
-- Discovery waits about two seconds and can return an id that the next frame occasionally omits, so a newly added sensor can appear stale until the next update.
 
 ## Possible improvements
 
