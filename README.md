@@ -1,17 +1,97 @@
-# tiresense
+# TireSense
 
-A new Flutter project.
+TireSense monitors tire pressure and temperature from a small set of sensors. Sensor frames come from a simulated BLE source. Serial numbers come from a mock HTTP API. Settings are stored on the device.
 
-## Getting Started
+The app is in English and Portuguese. The system language decides which one is shown.
 
-This project is a starting point for a Flutter application.
+## Run
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter pub get
+flutter run
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+On the dashboard, **Simulate Sensor Update** requests one frame. With continuous stream enabled in Settings, the same button starts and stops a live stream. Temperature can be shown in °C or °F. New sensors are discovered from the add button, up to the limit enforced by `AddSensorUseCase`.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Architecture
+
+Each layer only talks to the one below it. Views call view models, view models call use cases, use cases call repository interfaces, and the repository implementations talk to the data sources. The graph is wired in `lib/app`.
+
+The arrow points from the provider of the data to whoever uses it.
+
+```mermaid
+flowchart TB
+  subgraph datasources [Data sources]
+    SimulatedBleDataSource
+    SensorApi
+    SharedPreferences
+  end
+
+  subgraph repositories [Repositories]
+    SensorRepository
+    SerialNumberRepository
+    SettingsRepository
+  end
+
+  subgraph usecases [Use cases]
+    WatchSensorFramesUseCase
+    RequestSensorFrameUseCase
+    SetContinuousSensorStreamUseCase
+    GetSerialNumberUseCase
+    AddSensorUseCase
+    FindSensorUseCase
+    LoadSettingsUseCase
+    SaveSettingsUseCase
+  end
+
+  subgraph viewmodels [View models]
+    SensorsViewModel
+    SettingsViewModel
+  end
+
+  subgraph views [Views]
+    SensorsPage
+    SensorCard
+    FindSensorDialog
+    SettingsPage
+  end
+
+  SimulatedBleDataSource --> SensorRepository
+  SensorApi --> SerialNumberRepository
+  SharedPreferences --> SettingsRepository
+
+  SensorRepository --> WatchSensorFramesUseCase
+  SensorRepository --> RequestSensorFrameUseCase
+  SensorRepository --> SetContinuousSensorStreamUseCase
+  SensorRepository --> AddSensorUseCase
+  SensorRepository --> FindSensorUseCase
+  SerialNumberRepository --> GetSerialNumberUseCase
+  SettingsRepository --> LoadSettingsUseCase
+  SettingsRepository --> SaveSettingsUseCase
+
+  WatchSensorFramesUseCase --> SensorsViewModel
+  RequestSensorFrameUseCase --> SensorsViewModel
+  SetContinuousSensorStreamUseCase --> SensorsViewModel
+  GetSerialNumberUseCase --> SensorsViewModel
+  AddSensorUseCase --> SensorsViewModel
+  FindSensorUseCase --> SensorsViewModel
+  LoadSettingsUseCase --> SensorsViewModel
+  LoadSettingsUseCase --> SettingsViewModel
+  SaveSettingsUseCase --> SettingsViewModel
+
+  SensorsViewModel --> SensorsPage
+  SensorsViewModel --> SensorCard
+  SensorsViewModel --> FindSensorDialog
+  SettingsViewModel --> SettingsPage
+```
+
+`SensorsViewModel` reads the saved settings through `LoadSettingsUseCase`, including the temperature unit shown on each card. It does not watch `SettingsViewModel`.
+
+## Tests
+
+```bash
+flutter test
+flutter test integration_test
+```
+
+`flutter test` runs the unit and widget tests. The integration test boots `main`, checks the dashboard, switches the temperature unit to °F, and checks that the same card shows the converted value.
