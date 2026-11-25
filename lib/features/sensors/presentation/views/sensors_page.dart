@@ -48,37 +48,12 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
                 actions: [
                   IconButton(
                     tooltip: l10n.addSensor,
-                    onPressed: () async {
-                      final id = await showDialog<String>(
-                        context: context,
-                        builder: (context) => const FindSensorDialog(),
-                      );
-                      if (id == null || id.isEmpty || !context.mounted) return;
-                      final success = ref.read(sensorsViewModelProvider.notifier).addSensor(id);
-                      
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                          content: Text(success ? l10n.sensorAdded : l10n.sensorLimitReached,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onPrimaryContainer),
-                        )
-                      ));
-                    },
+                    onPressed: _addSensor,
                     icon: const Icon(Icons.add_circle),
                   ),
                   IconButton(
                     tooltip: l10n.settings,
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => const SettingsPage(),
-                        ),
-                      ).then((_) {
-                        if (mounted) {
-                          ref.read(sensorsViewModelProvider.notifier).updateState();
-                        }
-                      });
-                    },
+                    onPressed: _openSettings,
                     icon: const Icon(Icons.settings),
                   ),
                 ],
@@ -109,6 +84,46 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
         },
       ),
       bottomNavigationBar: const _SensorUpdateButton(),
+    );
+  }
+
+  void _openSettings() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const SettingsPage(),
+      ),
+    ).then((_) {
+      if (mounted) {
+        ref.read(sensorsViewModelProvider.notifier).updateState();
+      }
+    });
+  }
+
+  Future<void> _addSensor() async {
+    final id = await showDialog<String>(
+      context: context,
+      builder: (context) => const FindSensorDialog(),
+    );
+    
+    if (id == null || id.isEmpty || !mounted) return;
+    final success = ref.read(sensorsViewModelProvider.notifier).addSensor(id);
+    _showAddSensorResult(success);
+  }
+
+  void _showAddSensorResult(bool success) {
+    final l10n = AppLocalizations.of(context)!;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: colorScheme.primaryContainer,
+        content: Text(
+          success ? l10n.sensorAdded : l10n.sensorLimitReached,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onPrimaryContainer,
+          ),
+        ),
+      ),
     );
   }
 }
