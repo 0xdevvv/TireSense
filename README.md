@@ -11,7 +11,7 @@ flutter pub get
 flutter run
 ```
 
-On the dashboard, **Simulate Sensor Update** requests one frame. With continuous stream enabled in Settings, the same button starts and stops a live stream. Temperature can be shown in °C or °F. New sensors are discovered from the add button, up to the limit enforced by `AddSensorUseCase`.
+On the dashboard, **Simulate Sensor Update** requests one frame. With continuous stream enabled in Settings, the same button starts and stops a live stream. Temperature can be shown in °C or °F. New sensors are discovered from the add button.
 
 ## Architecture
 
@@ -84,8 +84,6 @@ flowchart TB
   SensorsViewModel --> FindSensorDialog
   SettingsViewModel --> SettingsPage
 ```
-
-`SensorsViewModel` reads the saved settings through `LoadSettingsUseCase`, including the temperature unit shown on each card. It does not watch `SettingsViewModel`.
 
 ## Tests
 
