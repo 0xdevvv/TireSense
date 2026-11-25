@@ -143,7 +143,7 @@ features
 - The simulated BLE source starts with `SENSOR_001` through `SENSOR_004`.
 - The mock serial-number API knows `SENSOR_001` through `SENSOR_010`. Any other id is a 404.
 - About one in five serial-number requests fails with a 503, so the error and retry states are visible without a real network.
-- Adding a sensor is capped at 7. The cap is a use case rule. The repository only stores the sensor.
+- Adding a sensor is capped at 7.
 - The device language selects English or Portuguese. The English label of the update button is exactly "Simulate Sensor Update".
 
 ## Limitations
