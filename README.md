@@ -92,10 +92,6 @@ State is held in Riverpod. `sensorsViewModelProvider` owns the `SensorPageState`
 ## Project layout
 
 ```text
-main.dart
-l10n
-test
-integration_test
 app
 ├── sensors_providers
 └── network_providers
