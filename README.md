@@ -105,15 +105,12 @@ State is held in Riverpod. `sensorsViewModelProvider` owns the page: the sensor 
 ## Limitations
 
 - There is no physical BLE device and no real server. Both boundaries are mocks behind the repository interfaces.
-- The continuous stream and the add-sensor flow are extras. With the stream setting off, the button always requests a single frame.
-- The card shows the temperature unit loaded when the screen opens and when you return from Settings. It does not watch `SettingsViewModel`.
 - Discovery waits about two seconds and can return an id that the next frame occasionally omits, so a newly added sensor can appear stale until the next update.
 
 ## Possible improvements
 
-- Replace `SimulatedBleDataSource` and `MockHttpClient` with a real BLE client and HTTP client without changing the use cases.
-- Page the sensor list if the count grows far past what a phone can show at once. The list is already built from ids, and each card already observes only itself.
-- Keep the English button label in every locale if a review must see the exact string "Simulate Sensor Update".
+- XXX
+  
 ## Tests
 
 ```bash
