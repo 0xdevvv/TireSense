@@ -11,7 +11,7 @@ flutter pub get
 flutter run
 ```
 
-On the dashboard, **Simulate Sensor Update** requests one frame. With continuous stream enabled in Settings, the same button starts and stops a live stream. Temperature can be shown in °C or °F. New sensors are discovered from the add button, up to the limit enforced by `AddSensorUseCase`.
+On the dashboard, **Simulate Sensor Update** requests one frame. With continuous stream enabled in Settings, the same button starts and stops a live stream. Temperature can be shown in °C or °F. New sensors are discovered from the add button.
 
 ## Architecture
 
@@ -114,7 +114,6 @@ State is held in Riverpod. `sensorsViewModelProvider` owns the page: the sensor 
 - Replace `SimulatedBleDataSource` and `MockHttpClient` with a real BLE client and HTTP client without changing the use cases.
 - Page the sensor list if the count grows far past what a phone can show at once. The list is already built from ids, and each card already observes only itself.
 - Keep the English button label in every locale if a review must see the exact string "Simulate Sensor Update".
-
 ## Tests
 
 ```bash
