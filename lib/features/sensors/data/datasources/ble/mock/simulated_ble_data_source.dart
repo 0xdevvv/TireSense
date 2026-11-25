@@ -26,7 +26,6 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
   Timer? _stream;
 
   @override
-  @override
   Stream<SensorFrame> frames() => _controller.stream;
 
   @override
@@ -40,7 +39,7 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
   void addSensor(String sensorId) {
     if (_sensorIds.contains(sensorId)) return;
     _sensorIds.add(sensorId);
-    _controller.add(_nextFrame());
+    _controller.add(_nextFrame(requiredId: sensorId));
   }
 
   @override
@@ -62,12 +61,12 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
     _stream = null;
   }
 
-  SensorFrame _nextFrame() {
+  SensorFrame _nextFrame({String? requiredId}) {
     final timestamp = DateTime.now();
     final readings = <SensorReading>[];
     for (final id in _sensorIds) {
       // The first frame includes every sensor so the screen starts populated.
-      final missing = _frameCount > 0 && _random.nextDouble() < _missingRate;
+      final missing = id != requiredId && _frameCount > 0 && _random.nextDouble() < _missingRate;
       if (missing) {
         continue;
       }
