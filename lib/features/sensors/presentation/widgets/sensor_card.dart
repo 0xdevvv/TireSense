@@ -52,7 +52,8 @@ class SensorCard extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
+            MergeSemantics(
+              child: Row(
               children: [
                 Text(
                   reading.id,
@@ -73,8 +74,8 @@ class SensorCard extends ConsumerWidget {
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 12),
+            )),
+            SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: TweenAnimationBuilder<double>(
@@ -157,6 +158,7 @@ class _Metric extends StatelessWidget {
       crossAxisAlignment: alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
         Text(
+          key: ValueKey(label),
           value,
           style: theme.textTheme.titleMedium?.copyWith(
             color: color,

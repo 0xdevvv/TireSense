@@ -6,7 +6,7 @@ import 'package:tiresense/features/sensors/presentation/views/sensors_page.dart'
 import 'package:tiresense/l10n/app_localizations.dart';
 import 'package:tiresense/shared/theme/app_colors.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final preferences = await SharedPreferences.getInstance();
   

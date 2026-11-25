@@ -47,6 +47,7 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
                 l10n.tireSense,
                 actions: [
                   IconButton(
+                    tooltip: l10n.addSensor,
                     onPressed: () async {
                       final id = await showDialog<String>(
                         context: context,
@@ -66,6 +67,7 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
                     icon: const Icon(Icons.add_circle),
                   ),
                   IconButton(
+                    tooltip: l10n.settings,
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
