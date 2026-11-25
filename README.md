@@ -15,7 +15,7 @@ On the dashboard, **Simulate Sensor Update** requests one frame. With continuous
 
 ## Architecture
 
-Each layer only talks to the one below it. Views call view models, view models call use cases, use cases call repository interfaces, and the repository implementations talk to the data sources. The graph is wired in `lib/app`.
+Each layer only talks to the one below it. Views call view models, view models call use cases, use cases call repository interfaces, and the repository implementations talk to the data sources.
 
 The arrow points from the provider of the data to whoever uses it.
 
@@ -84,8 +84,6 @@ flowchart TB
   SensorsViewModel --> FindSensorDialog
   SettingsViewModel --> SettingsPage
 ```
-
-`SensorsViewModel` reads the saved settings through `LoadSettingsUseCase`, including the temperature unit shown on each card. It does not watch `SettingsViewModel`.
 
 State is held in Riverpod. `sensorsViewModelProvider` owns the page: the sensor map, whether a stream is running, the button action, and the temperature unit. The page selects only `sensorIds`, so it rebuilds when a sensor is added or removed. Each `SensorCard` watches `sensorProvider(id)`, a family provider that selects that one sensor. A new serial number or a new reading rebuilds that card. The other cards stay as they are. The temperature unit is a separate `select` on the same state, so changing °C to °F rebuilds the cards without treating it as a new sensor frame.
 
