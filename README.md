@@ -89,6 +89,56 @@ State is held in Riverpod. `sensorsViewModelProvider` owns the `SensorPageState`
 
 `SettingsViewModel` is watched only by `SettingsPage`. Returning from that page calls `updateState()` on the sensors view model, which reloads the saved settings.
 
+## Project layout
+
+```text
+main.dart
+l10n
+test
+integration_test
+app
+├── sensors_providers
+└── network_providers
+core
+├── usecase
+├── result
+└── network
+shared
+├── layout
+├── theme
+└── widgets
+features
+├── sensors
+│   ├── data
+│   │   ├── datasources
+│   │   │   ├── ble
+│   │   │   └── sensor
+│   │   ├── dto
+│   │   └── repositories
+│   ├── domain
+│   │   ├── models
+│   │   ├── repositories
+│   │   ├── usecases
+│   │   └── exceptions
+│   └── presentation
+│       ├── views
+│       ├── view_models
+│       ├── states
+│       ├── widgets
+│       └── helpers
+└── settings
+    ├── data
+    │   └── repositories
+    ├── domain
+    │   ├── models
+    │   ├── repositories
+    │   └── usecases
+    └── presentation
+        ├── views
+        ├── view_models
+        └── helpers
+```
+
 ## Assumptions
 
 - Readings arrive as frames. A frame may omit a sensor that was present before. The missing sensor stays on screen and is marked stale.
