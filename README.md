@@ -85,7 +85,7 @@ flowchart TB
   SettingsViewModel --> SettingsPage
 ```
 
-State is held in Riverpod. `sensorsViewModelProvider` owns the page: the sensor map, whether a stream is running, the button action, and the temperature unit. The page selects only `sensorIds`, so it rebuilds when a sensor is added or removed. Each `SensorCard` watches `sensorProvider(id)`, a family provider that selects that one sensor. A new serial number or a new reading rebuilds that card. The other cards stay as they are. The temperature unit is a separate `select` on the same state, so changing °C to °F rebuilds the cards without treating it as a new sensor frame.
+State is held in Riverpod. `sensorsViewModelProvider` owns the page: the sensor map, whether a stream is running, the action button, and the temperature unit. The page selects only `sensorIds`, so it rebuilds when a sensor is added or removed. Each `SensorCard` watches `sensorProvider(id)`, a family provider that selects that one sensor. A new serial number or a new reading rebuilds that card. The other cards stay as they are. The temperature unit is a separate `select` on the same state, so changing °C to °F rebuilds the cards without treating it as a new sensor frame.
 
 `SettingsViewModel` is watched only by `SettingsPage`. Returning from that page calls `updateState()` on the sensors view model, which reloads the saved settings.
 
