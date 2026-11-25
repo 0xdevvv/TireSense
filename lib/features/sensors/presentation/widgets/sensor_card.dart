@@ -5,7 +5,6 @@ import 'package:tiresense/features/sensors/presentation/helpers/sensor_limits.da
 import 'package:tiresense/features/sensors/presentation/states/serial_number_state.dart';
 import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
 import 'package:tiresense/features/settings/presentation/helpers/temperature_unit_text.dart';
-import 'package:tiresense/features/settings/presentation/view_models/settings_view_model.dart';
 import 'package:tiresense/l10n/app_localizations.dart';
 import 'package:tiresense/shared/widgets/custom_widgets.dart';
 
@@ -26,7 +25,7 @@ class SensorCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final sensor = ref.watch(sensorProvider(sensorId));
-    final settings = ref.watch(settingsViewModelProvider);
+    final unit = ref.watch(sensorsViewModelProvider.select((state) => state.unit));
     
     if (sensor == null) {
       return const SizedBox.shrink();
@@ -111,7 +110,7 @@ class SensorCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: _Metric(
-                    value: settings.unit.format(reading.temperature),
+                    value: unit.format(reading.temperature),
                     label: l10n.temperature,
                     color: sensorColor,
                     alignEnd: false,

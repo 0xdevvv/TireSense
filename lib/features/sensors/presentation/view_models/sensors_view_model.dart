@@ -8,6 +8,7 @@ import 'package:tiresense/features/sensors/presentation/states/sensor_page_state
 import 'package:tiresense/features/sensors/presentation/states/sensor_state.dart';
 import 'package:tiresense/features/sensors/presentation/states/sensors_state.dart';
 import 'package:tiresense/features/sensors/presentation/states/serial_number_state.dart';
+import 'package:tiresense/features/settings/domain/models/settings.dart';
 
 final sensorsViewModelProvider = NotifierProvider<SensorsViewModel, SensorPageState>(SensorsViewModel.new);
 
@@ -20,7 +21,7 @@ final discoveredSensorProvider = FutureProvider.autoDispose<String>((ref) {
 });
 
 final class SensorsViewModel extends Notifier<SensorPageState> {
-  bool get _continuousStreamSettings => ref.read(loadSettingsUseCaseProvider).execute().continuousStream;
+  Settings get _settings => ref.read(loadSettingsUseCaseProvider).execute();
 
   @override
   SensorPageState build() {
@@ -34,6 +35,7 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
     return SensorPageState(
       sensors: const SensorsState(),
       action: _action(isStreaming: false),
+      unit: _settings.unit,
     );
   }
 
@@ -51,7 +53,8 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
   }
 
   void updateState() {
-    final updatedIsStreaming = _continuousStreamSettings && state.isStreaming;
+    final settings = _settings;
+    final updatedIsStreaming = settings.continuousStream && state.isStreaming;
     
     if (state.isStreaming && !updatedIsStreaming) {
       ref.read(setContinuousSensorStreamUseCaseProvider).execute(false);
@@ -60,11 +63,12 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
     state = state.copyWith(
       isStreaming: updatedIsStreaming,
       action: _action(isStreaming: updatedIsStreaming),
+      unit: settings.unit,
     );
   }
 
   Future<void> requestData({bool firstFrame = false}) {
-    if (firstFrame || !_continuousStreamSettings) {
+    if (firstFrame || !_settings.continuousStream) {
       return ref.read(requestSensorFrameUseCaseProvider).execute();
     }
 
@@ -127,7 +131,7 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
   }
 
   SensorButtonAction _action({required bool isStreaming}) {
-    if (!_continuousStreamSettings) return SensorButtonAction.simulate;
+    if (!_settings.continuousStream) return SensorButtonAction.simulate;
     if (isStreaming) return SensorButtonAction.stop;
     return SensorButtonAction.start;
   }
