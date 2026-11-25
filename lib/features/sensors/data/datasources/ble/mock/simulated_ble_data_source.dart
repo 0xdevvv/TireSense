@@ -26,8 +26,6 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
   Timer? _stream;
 
   @override
-  int get sensorCount => _sensorIds.length;
-
   @override
   Stream<SensorFrame> frames() => _controller.stream;
 

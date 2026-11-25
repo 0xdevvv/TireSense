@@ -143,7 +143,6 @@ features
 - The simulated BLE source starts with `SENSOR_001` through `SENSOR_004`.
 - The mock serial-number API knows `SENSOR_001` through `SENSOR_010`. Any other id is a 404.
 - About one in five serial-number requests fails with a 503, so the error and retry states are visible without a real network.
-- Adding a sensor is capped at 7. The cap is a use case rule. The repository forwards the add to the data source, which keeps the id and emits a frame.
 - The device language selects English or Portuguese. The English label of the update button is exactly "Simulate Sensor Update".
 
 ## Limitations
@@ -152,7 +151,7 @@ features
 
 ## Possible improvements
 
-- Add a way to remove a sensor. The list only grows, up to the use case limit. A remove action would drop that id from the simulated source and from the page state.
+- Add a way to remove a sensor. The list only grows. A remove action would drop that id from the simulated source and from the page state.
 - Replace the manual `Navigator.push` with `go_router`, so Settings and the find-sensor flow are routes instead of calls made inside the page.
 - Add a small log of frames, serial-number failures and setting changes. Today those events only update the screen, so a failed request is visible on the card and nowhere else.
   

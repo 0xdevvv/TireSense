@@ -37,9 +37,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get sensorAdded => 'Sensor adicionado';
 
   @override
-  String get sensorLimitReached => 'Limite de sensores atingido';
-
-  @override
   String get settings => 'Definições';
 
   @override

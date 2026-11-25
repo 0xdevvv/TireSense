@@ -37,9 +37,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sensorAdded => 'Sensor added';
 
   @override
-  String get sensorLimitReached => 'Sensor limit reached';
-
-  @override
   String get settings => 'Settings';
 
   @override

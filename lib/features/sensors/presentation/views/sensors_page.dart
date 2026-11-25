@@ -106,11 +106,11 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
     );
     
     if (id == null || id.isEmpty || !mounted) return;
-    final success = ref.read(sensorsViewModelProvider.notifier).addSensor(id);
-    _showAddSensorResult(success);
+    ref.read(sensorsViewModelProvider.notifier).addSensor(id);
+    _showSensorAdded();
   }
 
-  void _showAddSensorResult(bool success) {
+  void _showSensorAdded() {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -118,7 +118,7 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
       SnackBar(
         backgroundColor: colorScheme.primaryContainer,
         content: Text(
-          success ? l10n.sensorAdded : l10n.sensorLimitReached,
+          l10n.sensorAdded,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: colorScheme.onPrimaryContainer,
           ),

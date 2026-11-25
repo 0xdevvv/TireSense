@@ -79,8 +79,6 @@ final class _FakeSensorRepository implements SensorRepository {
   }
 
   @override
-  int get sensorCount => 0;
-
   @override
   Future<String> findSensor() async => 'SENSOR_005';
 

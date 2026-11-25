@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiresense/core/result/result.dart';
-import 'package:tiresense/features/sensors/domain/exceptions/sensor_limit_reaached_exception.dart';
 import 'package:tiresense/features/sensors/domain/models/sensor_frame.dart';
 import 'package:tiresense/app/sensors_providers.dart';
 import 'package:tiresense/features/sensors/presentation/states/sensor_page_state.dart';
@@ -43,13 +42,8 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
     return ref.read(findSensorUseCaseProvider).execute();
   }
 
-  bool addSensor(String sensorId) {
-    try {
-      ref.read(addSensorUseCaseProvider).execute(sensorId);
-      return true;
-    } on SensorLimitReachedException catch (_) {
-      return false;
-    } 
+  void addSensor(String sensorId) {
+    ref.read(addSensorUseCaseProvider).execute(sensorId);
   }
 
   void updateState() {

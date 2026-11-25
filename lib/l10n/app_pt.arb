@@ -9,7 +9,6 @@
   "searchingForSensor": "A procurar um sensor",
   "noSensorFound": "Nenhum sensor encontrado",
   "sensorAdded": "Sensor adicionado",
-  "sensorLimitReached": "Limite de sensores atingido",
   "settings": "Definições",
   "continuousSensorStream": "Fluxo contínuo de sensores",
   "continuousSensorStreamSubtitle": "Continuar a receber dados dos sensores em tempo real",

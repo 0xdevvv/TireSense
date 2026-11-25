@@ -70,8 +70,6 @@ final class _SilentSensorRepository implements SensorRepository {
   Future<void> requestFrame() async {}
 
   @override
-  int get sensorCount => 0;
-
   @override
   Future<String> findSensor() async => 'SENSOR_005';
 

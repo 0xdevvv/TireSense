@@ -152,12 +152,6 @@ abstract class AppLocalizations {
   /// **'Sensor added'**
   String get sensorAdded;
 
-  /// No description provided for @sensorLimitReached.
-  ///
-  /// In en, this message translates to:
-  /// **'Sensor limit reached'**
-  String get sensorLimitReached;
-
   /// No description provided for @settings.
   ///
   /// In en, this message translates to:
