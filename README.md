@@ -85,7 +85,7 @@ flowchart TB
   SettingsViewModel --> SettingsPage
 ```
 
-State is held in Riverpod. `sensorsViewModelProvider` owns the `SensorPageState`: the sensor map, whether a stream is running, the action button, and the temperature unit. The page selects only `sensorIds`, so it rebuilds when a sensor is added or removed. Each `SensorCard` watches `sensorProvider(id)`, a family provider that selects that one sensor. A new serial number or a new reading rebuilds that card. The other cards stay as they are. The temperature unit is a separate `select` on the same state, so changing °C to °F rebuilds the cards without treating it as a new sensor frame.
+State is held in Riverpod. `sensorsViewModelProvider` owns the `SensorPageState`: the sensor map, whether a stream is running, the action button, and the temperature unit. The page selects only `sensorIds`, so it rebuilds when that set of ids changes. Each `SensorCard` watches `sensorProvider(id)`, a family provider that selects that one sensor. A serial-number result replaces only that sensor's state, so only that card rebuilds. A new frame builds a new state for every known sensor, so every card on screen rebuilds. The page list does not, because the same id list is kept when no id was added. The temperature unit is a separate `select` on the same state, so changing °C to °F rebuilds the cards without treating it as a new sensor frame.
 
 `SettingsViewModel` is watched only by `SettingsPage`. Returning from that page calls `updateState()` on the sensors view model, which reloads the saved settings.
 
@@ -143,12 +143,12 @@ features
 - The simulated BLE source starts with `SENSOR_001` through `SENSOR_004`.
 - The mock serial-number API knows `SENSOR_001` through `SENSOR_010`. Any other id is a 404.
 - About one in five serial-number requests fails with a 503, so the error and retry states are visible without a real network.
-- Adding a sensor is capped at 7.
+- Adding a sensor is capped at 7. The cap is a use case rule. The repository forwards the add to the data source, which keeps the id and emits a frame.
 - The device language selects English or Portuguese. The English label of the update button is exactly "Simulate Sensor Update".
 
 ## Limitations
 
-- There is no physical BLE device and no real server. Both boundaries are mocks behind the repository interfaces.
+- There is no physical BLE device and no real server. `SimulatedBleDataSource` stands in for BLE behind `SensorRepositoryImpl`. `MockHttpClient` stands in for HTTP behind `SensorApiImpl`. `SerialNumberRepositoryImpl` calls the `SensorApi` interface, not the mock.
 
 ## Possible improvements
 
