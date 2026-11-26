@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiresense/features/sensors/presentation/states/sensor_page_state.dart';
-import 'package:tiresense/features/settings/presentation/views/settings_page.dart';
 import 'package:tiresense/features/sensors/presentation/view_models/sensors_view_model.dart';
 import 'package:tiresense/features/sensors/presentation/views/add_sensor_dialog.dart';
 import 'package:tiresense/features/sensors/presentation/widgets/sensor_card.dart';
@@ -88,11 +87,7 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
   }
 
   void _openSettings() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => const SettingsPage(),
-      ),
-    ).then((_) {
+    Navigator.of(context).pushNamed('/settings').then((_) {
       if (mounted) {
         ref.read(sensorsViewModelProvider.notifier).updateState();
       }
