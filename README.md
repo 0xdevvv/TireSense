@@ -154,6 +154,7 @@ features
 - Add a way to remove a sensor. The list only grows. A remove action would drop that id from the simulated source and from the page state.
 - Replace the manual `Navigator.push` with `go_router`, so Settings and the find-sensor flow are routes instead of calls made inside the page.
 - Add a small log of frames, serial-number failures and setting changes. Today those events only update the screen, so a failed request is visible on the card and nowhere else.
+- Add feature flags so extras such as the continuous stream, adding sensors, and Fahrenheit can be turned on or off without shipping a new build.
   
 ## Tests
 
