@@ -47,9 +47,8 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
     ref.read(addSensorUseCaseProvider).execute(sensorId);
   }
 
-  void updateState() {
-    final settings = _settings;
-    final updatedIsStreaming = settings.continuousStream && state.isStreaming;
+  void reloadSettings() {
+    final updatedIsStreaming = _settings.continuousStream && state.isStreaming;
     
     if (state.isStreaming && !updatedIsStreaming) {
       ref.read(setContinuousSensorStreamUseCaseProvider).execute(false);
@@ -58,7 +57,7 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
     state = state.copyWith(
       isStreaming: updatedIsStreaming,
       action: _action(isStreaming: updatedIsStreaming),
-      unit: settings.unit,
+      unit: _settings.unit,
     );
   }
 

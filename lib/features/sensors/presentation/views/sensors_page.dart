@@ -106,7 +106,7 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
   void _openSettings() {
     Navigator.of(context).pushNamed('/settings').then((_) {
       if (mounted) {
-        ref.read(sensorsViewModelProvider.notifier).updateState();
+        ref.read(sensorsViewModelProvider.notifier).reloadSettings();
       }
     });
   }
