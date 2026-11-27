@@ -74,7 +74,7 @@ class SensorCard extends ConsumerWidget {
                 ),
               ],
             )),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: TweenAnimationBuilder<double>(

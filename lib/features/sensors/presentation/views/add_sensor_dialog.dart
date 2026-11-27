@@ -23,7 +23,7 @@ class _FindSensorDialogState extends ConsumerState<FindSensorDialog> {
         loading: () => Row(
         children: [
           CustomWidgets.circularLoading,
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           Text(l10n.searchingForSensor),
         ]),
         data: (sensorId) => Text(sensorId),

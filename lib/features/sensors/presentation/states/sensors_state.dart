@@ -28,7 +28,7 @@ final class SensorsState {
       final isNew = currentSensor == null;
 
       sensors[id] = SensorState(
-        reading: isNew ? newReading! : currentSensor.reading,
+        reading: newReading ?? currentSensor!.reading,
         serialNumber: isNew ? const SerialNumberLoading() : currentSensor.serialNumber,
         isStale: newReading == null,
       );

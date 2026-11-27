@@ -77,8 +77,6 @@ final class SensorsViewModel extends Notifier<SensorPageState> {
     } else {
       _startStream();
     }
-    
-    return Future<void>.value();
   }
 
   void _startStream() {

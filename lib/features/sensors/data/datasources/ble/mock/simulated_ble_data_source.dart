@@ -22,7 +22,7 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
   final Map<String, int> _batteryLevel = {};
   final StreamController<SensorFrame> _controller = StreamController<SensorFrame>.broadcast();
 
-  int _frameCount = 0;
+  bool _isFirstFrame = true;
   Timer? _stream;
 
   @override
@@ -66,13 +66,13 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
     final readings = <SensorReading>[];
     for (final id in _sensorIds) {
       // The first frame includes every sensor so the screen starts populated.
-      final missing = id != requiredId && _frameCount > 0 && _random.nextDouble() < _missingRate;
-      if (missing) {
-        continue;
+      final shouldAddReading = id == requiredId || _isFirstFrame || _random.nextDouble() >= _missingRate;
+      
+      if (shouldAddReading) {
+        readings.add(_reading(id, timestamp));
       }
-      readings.add(_reading(id, timestamp));
     }
-    _frameCount++;
+    _isFirstFrame = false;
     return SensorFrame(timestamp: timestamp, readings: readings);
   }
 
@@ -103,7 +103,7 @@ final class SimulatedBleDataSource implements BleSensorDataSource {
   }
 
   void dispose() {
-    _controller.close();
     stopStream();
+    _controller.close();
   }
 }
