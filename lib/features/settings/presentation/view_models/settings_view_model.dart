@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiresense/app/sensors_providers.dart';
 import 'package:tiresense/features/settings/domain/models/settings.dart';
@@ -26,6 +29,17 @@ final class SettingsViewModel extends Notifier<Settings> {
 
   void _save(Settings settings) {
     state = settings;
-    ref.read(saveSettingsUseCaseProvider).execute(settings);
+    unawaited(_persist(settings));
+  }
+
+  Future<void> _persist(Settings settings) async {
+    try {
+      await ref.read(saveSettingsUseCaseProvider).execute(settings);
+    } catch (error, stackTrace) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: error,
+        stack: stackTrace,
+      ));
+    }
   }
 }

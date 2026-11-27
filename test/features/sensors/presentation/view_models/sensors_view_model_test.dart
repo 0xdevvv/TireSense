@@ -82,6 +82,20 @@ void main() {
     expect(serials.requested, ['SENSOR_001', 'SENSOR_001']);
   });
 
+  test('a missing serial number is not requested again', () async {
+    final sensors = _FakeSensorRepository();
+    final serials = _FakeSerialNumberRepository(ErrorResult(NotFoundFailure()));
+    final container = _container(sensors, serials);
+
+    await container.read(sensorsViewModelProvider.notifier).requestData();
+    sensors.emit(_frame(['SENSOR_001']));
+    await _flush();
+    sensors.emit(_frame(['SENSOR_001']));
+    await _flush();
+
+    expect(serials.requested, ['SENSOR_001']);
+  });
+
   test('a failed serial number can be retried', () async {
     final sensors = _FakeSensorRepository();
     final serials = _FakeSerialNumberRepository(ErrorResult(NetworkFailure()));

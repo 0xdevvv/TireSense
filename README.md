@@ -114,8 +114,7 @@ features
 │   ├── domain
 │   │   ├── models
 │   │   ├── repositories (interface)
-│   │   ├── usecases
-│   │   └── exceptions
+│   │   └── usecases
 │   └── presentation
 │       ├── views
 │       ├── view_models

@@ -8,10 +8,6 @@ enum TemperatureUnit {
   };
 
   static TemperatureUnit fromName(String name) {
-    return switch (name) {
-      'celsius' => TemperatureUnit.celsius,
-      'fahrenheit' => TemperatureUnit.fahrenheit,
-      _ => throw ArgumentError.value(name, 'name', 'Invalid temperature unit name'),
-    };
+    return TemperatureUnit.values.asNameMap()[name] ?? TemperatureUnit.celsius;
   }
 }

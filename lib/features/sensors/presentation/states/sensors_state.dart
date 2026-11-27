@@ -1,3 +1,4 @@
+import 'package:tiresense/core/result/failure.dart';
 import 'package:tiresense/features/sensors/domain/models/sensor_frame.dart';
 import 'package:tiresense/features/sensors/presentation/states/sensor_state.dart';
 import 'package:tiresense/features/sensors/presentation/states/serial_number_state.dart';
@@ -58,7 +59,11 @@ final class SensorsState {
   }
 
   bool _needsSerialNumber(SerialNumberState? current) {
-    return current == null || current is SerialNumberFailed;
+    return switch (current) {
+      null => true,
+      SerialNumberFailed(:final failure) => failure is! NotFoundFailure,
+      _ => false,
+    };
   }
 
   SensorsState updateSerialNumber(

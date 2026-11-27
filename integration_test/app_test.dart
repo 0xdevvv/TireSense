@@ -25,7 +25,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('°C'), findsWidgets);
-    final celsiusText = tester.widget<Text>(find.byKey(const ValueKey('Temperature')).first).data!;
+    final celsiusText = tester.widget<Text>(find.byKey(const ValueKey('temperature')).first).data!;
     final celsius = double.parse(celsiusText.split(' ').first);
     final fahrenheit = (celsius * 9 / 5 + 32).toStringAsFixed(1);
 
@@ -41,7 +41,7 @@ void main() {
     expect(find.text('TireSense'), findsOneWidget);
     expect(find.textContaining('°C'), findsNothing);
     
-    final shown = tester.widget<Text>(find.byKey(const ValueKey('Temperature')).first).data;
+    final shown = tester.widget<Text>(find.byKey(const ValueKey('temperature')).first).data;
     expect(shown, '$fahrenheit °F');
   });
 }

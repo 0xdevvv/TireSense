@@ -112,6 +112,7 @@ class SensorCard extends ConsumerWidget {
                   child: _Metric(
                     value: unit.format(reading.temperature),
                     label: l10n.temperature,
+                    valueKey: 'temperature',
                     color: sensorColor,
                     alignEnd: false,
                   ),
@@ -120,6 +121,7 @@ class SensorCard extends ConsumerWidget {
                   child: _Metric(
                     value: '${reading.rssi} dBm',
                     label: l10n.rssi,
+                    valueKey: 'rssi',
                     color: sensorColor,
                     alignEnd: true,
                   ),
@@ -140,12 +142,14 @@ class SensorCard extends ConsumerWidget {
 class _Metric extends StatelessWidget {
   final String value;
   final String label;
+  final String valueKey;
   final Color color;
   final bool alignEnd;
 
   const _Metric({
     required this.value,
     required this.label,
+    required this.valueKey,
     required this.color,
     required this.alignEnd,
   });
@@ -157,7 +161,7 @@ class _Metric extends StatelessWidget {
       crossAxisAlignment: alignEnd ? CrossAxisAlignment.end : CrossAxisAlignment.start,
       children: [
         Text(
-          key: ValueKey(label),
+          key: ValueKey(valueKey),
           value,
           style: theme.textTheme.titleMedium?.copyWith(
             color: color,

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tiresense/features/sensors/presentation/states/sensor_page_state.dart';
@@ -22,7 +24,9 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        ref.read(sensorsViewModelProvider.notifier).requestData(firstFrame: true);
+        unawaited(
+          ref.read(sensorsViewModelProvider.notifier).requestData(firstFrame: true),
+        );
       }
     });
   }
@@ -33,6 +37,9 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
     
     final sensorIds = ref.watch(
       sensorsViewModelProvider.select((state) => state.sensors.sensorIds),
+    );
+    final hasStreamError = ref.watch(
+      sensorsViewModelProvider.select((state) => state.hasStreamError),
     );
 
     return Scaffold(
@@ -57,6 +64,16 @@ class _SensorsPageState extends ConsumerState<SensorsPage> {
                   ),
                 ],
               ),
+              if (hasStreamError)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(inset, PageLayout.listTop, inset, 0),
+                    child: Text(
+                      l10n.unexpectedError,
+                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+                    ),
+                  ),
+                ),
               if (sensorIds.isEmpty)
                 const SliverFillRemaining(
                   hasScrollBody: false,
@@ -153,7 +170,7 @@ class _SensorUpdateButton extends ConsumerWidget {
             constraints: const BoxConstraints(maxWidth: PageLayout.maxWidth),
             child: FilledButton(
               onPressed: () {
-                ref.read(sensorsViewModelProvider.notifier).requestData();
+                unawaited(ref.read(sensorsViewModelProvider.notifier).requestData());
               },
               child: Text(switch (action) {
                 SensorButtonAction.simulate => l10n.simulateSensorUpdate,
