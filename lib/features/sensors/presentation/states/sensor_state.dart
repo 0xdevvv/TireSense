@@ -3,13 +3,13 @@ import 'package:tiresense/features/sensors/presentation/states/serial_number_sta
 
 final class SensorState {
   final SensorReading reading;
-  final SerialNumberState? serialNumber;
+  final SerialNumberState serialNumber;
   final bool isStale;
 
   const SensorState({
     required this.reading,
-    this.serialNumber,
-    this.isStale = false,
+    required this.serialNumber,
+    required this.isStale,
   });
 
   String get id => reading.id;

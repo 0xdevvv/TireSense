@@ -195,7 +195,7 @@ class _SensorTag extends StatelessWidget {
 }
 
 class _SerialNumberLine extends StatelessWidget {
-  final SerialNumberState? serialNumber;
+  final SerialNumberState serialNumber;
   final VoidCallback onRetry;
 
   const _SerialNumberLine({required this.serialNumber, required this.onRetry});
@@ -205,7 +205,7 @@ class _SerialNumberLine extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     return switch (serialNumber) {
-      null || SerialNumberLoading() => const Align(
+      SerialNumberLoading() => const Align(
         alignment: Alignment.centerLeft,
         child: CustomWidgets.circularLoading,
       ),

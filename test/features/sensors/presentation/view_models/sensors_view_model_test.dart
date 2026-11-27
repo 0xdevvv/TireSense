@@ -59,7 +59,7 @@ void main() {
     expect(state.sensors.sensor('SENSOR_001')!.isStale, isTrue);
   });
 
-  test('the next frame requests a failed serial number again', () async {
+  test('the next frame does not request a failed serial number again', () async {
     final sensors = _FakeSensorRepository();
     final serials = _FakeSerialNumberRepository(ErrorResult(NetworkFailure()));
     final container = _container(sensors, serials);
@@ -77,9 +77,9 @@ void main() {
           .read(sensorsViewModelProvider)
           .sensors.sensor('SENSOR_001')!
           .serialNumber,
-      isA<SerialNumberReady>(),
+      isA<SerialNumberFailed>(),
     );
-    expect(serials.requested, ['SENSOR_001', 'SENSOR_001']);
+    expect(serials.requested, ['SENSOR_001']);
   });
 
   test('a missing serial number is not requested again', () async {

@@ -138,7 +138,7 @@ features
 
 - Readings arrive as frames. A frame may omit a sensor that was present before. The missing sensor stays on screen and is marked stale.
 - The domain temperature is always Celsius. Fahrenheit is applied when the card formats the value.
-- A serial number is requested when the sensor first appears and again after a failure. A successful serial number is not requested again.
+- A serial number is requested when the sensor first appears. A later frame does not ask again. The retry control on the card does.
 - The simulated BLE source starts with `SENSOR_001` through `SENSOR_004`.
 - The mock serial-number API knows `SENSOR_001` through `SENSOR_010`. Any other id is a 404.
 - About one in five serial-number requests fails with a 503, so the error and retry states are visible without a real network.

@@ -1,4 +1,3 @@
-import 'package:tiresense/core/result/failure.dart';
 import 'package:tiresense/features/sensors/domain/models/sensor_frame.dart';
 import 'package:tiresense/features/sensors/presentation/states/sensor_state.dart';
 import 'package:tiresense/features/sensors/presentation/states/serial_number_state.dart';
@@ -26,16 +25,15 @@ final class SensorsState {
     for (final id in {...sensors.keys, ...arrived.keys}) {
       final newReading = arrived[id];
       final currentSensor = sensors[id];
+      final isNew = currentSensor == null;
 
-      final needsSerialNumber = _needsSerialNumber(currentSensor?.serialNumber);
-      
       sensors[id] = SensorState(
-        reading: newReading ?? currentSensor!.reading,
-        serialNumber: needsSerialNumber ? const SerialNumberLoading() : currentSensor?.serialNumber,
+        reading: isNew ? newReading! : currentSensor.reading,
+        serialNumber: isNew ? const SerialNumberLoading() : currentSensor.serialNumber,
         isStale: newReading == null,
       );
       
-      if (needsSerialNumber) {
+      if (isNew) {
         pendingSerialNumbers.add(id);
       }
     }
@@ -56,14 +54,6 @@ final class SensorsState {
     }
     
     return sensors.keys.toList()..sort();
-  }
-
-  bool _needsSerialNumber(SerialNumberState? current) {
-    return switch (current) {
-      null => true,
-      SerialNumberFailed(:final failure) => failure is! NotFoundFailure,
-      _ => false,
-    };
   }
 
   SensorsState updateSerialNumber(
